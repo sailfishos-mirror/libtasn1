@@ -30,6 +30,7 @@
    };   cat leak-d69d42ff01f6c3acca35dee27538a99e6821fced | ./corpus2array
  */
 
+#include <config.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
