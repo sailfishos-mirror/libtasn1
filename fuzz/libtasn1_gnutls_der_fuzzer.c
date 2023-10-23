@@ -128,7 +128,7 @@ const asn1_static_node gnutls_asn1_tab[] = {
 };
 
 int
-LLVMFuzzerTestOneInput (const uint8_t * data, size_t size)
+LLVMFuzzerTestOneInput (const uint8_t *data, size_t size)
 {
   static asn1_node _gnutls_gnutls_asn = NULL;
   static int first = 1;

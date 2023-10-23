@@ -28,7 +28,7 @@
 #define MAXDATASIZE 512
 
 int
-LLVMFuzzerTestOneInput (const uint8_t * data, size_t size)
+LLVMFuzzerTestOneInput (const uint8_t *data, size_t size)
 {
   int ret_len;
 

@@ -1098,7 +1098,7 @@ asn1_read_tag (asn1_node_const root, const char *name, int *tagValue,
  * Returns: %ASN1_SUCCESS if the node exists.
  **/
 int
-asn1_read_node_value (asn1_node_const node, asn1_data_node_st * data)
+asn1_read_node_value (asn1_node_const node, asn1_data_node_st *data)
 {
   data->name = node->name;
   data->value = node->value;

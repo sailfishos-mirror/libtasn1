@@ -62,7 +62,7 @@ __attribute__((no_sanitize ("integer")))
 /* Return: pointer to the new element.                */
 /******************************************************/
 asn1_node
-_asn1_add_static_node (list_type ** e_list, unsigned int type)
+_asn1_add_static_node (list_type **e_list, unsigned int type)
 {
   list_type *p;
   asn1_node punt;
@@ -88,7 +88,7 @@ _asn1_add_static_node (list_type ** e_list, unsigned int type)
 }
 
 static int
-_asn1_add_static_node2 (list_type ** e_list, asn1_node node)
+_asn1_add_static_node2 (list_type **e_list, asn1_node node)
 {
   list_type *p;
 
@@ -559,7 +559,7 @@ _asn1_is_up (asn1_node_const up_cand, asn1_node_const down)
 /* Description: deletes the list element given                    */
 /******************************************************************/
 void
-_asn1_delete_node_from_list (list_type * list, asn1_node node)
+_asn1_delete_node_from_list (list_type *list, asn1_node node)
 {
   list_type *p = list;
 
@@ -577,7 +577,7 @@ _asn1_delete_node_from_list (list_type * list, asn1_node node)
 /*  pointed by them).                                             */
 /******************************************************************/
 void
-_asn1_delete_list (list_type * e_list)
+_asn1_delete_list (list_type *e_list)
 {
   list_type *p;
 
@@ -595,7 +595,7 @@ _asn1_delete_list (list_type * e_list)
 /*  pointed by them.                                              */
 /******************************************************************/
 void
-_asn1_delete_list_and_nodes (list_type * e_list)
+_asn1_delete_list_and_nodes (list_type *e_list)
 {
   list_type *p;
 
@@ -727,7 +727,7 @@ _asn1_change_integer_value (asn1_node node)
 /*   otherwise ASN1_SUCCESS                                       */
 /******************************************************************/
 int
-_asn1_expand_object_id (list_type ** list, asn1_node node)
+_asn1_expand_object_id (list_type **list, asn1_node node)
 {
   asn1_node p, p2, p3, p4, p5;
   char name_root[ASN1_MAX_NAME_SIZE], name2[2 * ASN1_MAX_NAME_SIZE + 1];
