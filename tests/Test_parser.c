@@ -122,7 +122,7 @@ test_type test_array[] = {
 };
 
 static int
-readLine (FILE * file, char *line)
+readLine (FILE *file, char *line)
 {
   int c;
 

@@ -915,7 +915,7 @@ delete_unneeded_choice_fields (asn1_node p)
  *   name (*@ELEMENT deleted).
  **/
 int
-asn1_der_decoding2 (asn1_node * element, const void *ider, int *max_ider_len,
+asn1_der_decoding2 (asn1_node *element, const void *ider, int *max_ider_len,
 		    unsigned int flags, char *errorDescription)
 {
   asn1_node node, p, p2, p3;
@@ -1614,7 +1614,7 @@ cleanup:
  *   name (*@ELEMENT deleted).
  **/
 int
-asn1_der_decoding (asn1_node * element, const void *ider, int ider_len,
+asn1_der_decoding (asn1_node *element, const void *ider, int ider_len,
 		   char *errorDescription)
 {
   return asn1_der_decoding2 (element, ider, &ider_len, 0, errorDescription);
@@ -1645,7 +1645,7 @@ asn1_der_decoding (asn1_node * element, const void *ider, int ider_len,
  *   match the structure @structure (*ELEMENT deleted).
  **/
 int
-asn1_der_decoding_element (asn1_node * structure, const char *elementName,
+asn1_der_decoding_element (asn1_node *structure, const char *elementName,
 			   const void *ider, int len, char *errorDescription)
 {
   return asn1_der_decoding (structure, ider, len, errorDescription);
@@ -1743,7 +1743,7 @@ asn1_der_decoding_startEnd (asn1_node element, const void *ider, int ider_len,
  *   depending on DER decoding.
  **/
 int
-asn1_expand_any_defined_by (asn1_node_const definitions, asn1_node * element)
+asn1_expand_any_defined_by (asn1_node_const definitions, asn1_node *element)
 {
   char name[2 * ASN1_MAX_NAME_SIZE + 2], value[ASN1_MAX_NAME_SIZE];
   int retCode = ASN1_SUCCESS, result;
@@ -1973,7 +1973,7 @@ asn1_expand_any_defined_by (asn1_node_const definitions, asn1_node * element)
  *   use for expansion, or other errors depending on DER decoding.
  **/
 int
-asn1_expand_octet_string (asn1_node_const definitions, asn1_node * element,
+asn1_expand_octet_string (asn1_node_const definitions, asn1_node *element,
 			  const char *octetName, const char *objectName)
 {
   char name[2 * ASN1_MAX_NAME_SIZE + 1], value[ASN1_MAX_NAME_SIZE];
@@ -2192,7 +2192,7 @@ asn1_decode_simple_der (unsigned int etype, const unsigned char *der,
 }
 
 static int
-append (uint8_t ** dst, unsigned *dst_size, const unsigned char *src,
+append (uint8_t **dst, unsigned *dst_size, const unsigned char *src,
 	unsigned src_size)
 {
   if (src_size == 0)

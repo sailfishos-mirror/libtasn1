@@ -68,7 +68,7 @@ Mandatory arguments to long options are mandatory for short options too.\n\
 #define ASSIGNMENT_EOF     3
 
 static int
-readAssignment (FILE * file, char *varName, char *value)
+readAssignment (FILE *file, char *varName, char *value)
 {
 
   int ret;

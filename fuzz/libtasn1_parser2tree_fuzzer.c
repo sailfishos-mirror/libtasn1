@@ -50,7 +50,7 @@ fopen (const char *pathname, const char *mode)
 #endif
 
 int
-LLVMFuzzerTestOneInput (const uint8_t * data, size_t size)
+LLVMFuzzerTestOneInput (const uint8_t *data, size_t size)
 {
   char errorDescription[ASN1_MAX_ERROR_DESCRIPTION_SIZE];
   asn1_node definitions = NULL;

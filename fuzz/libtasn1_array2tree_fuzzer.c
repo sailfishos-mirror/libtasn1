@@ -47,7 +47,7 @@ struct fuzz_elem
 #define MAXDATASIZE (100 * sizeof(struct fuzz_elem))
 
 int
-LLVMFuzzerTestOneInput (const uint8_t * data, size_t size)
+LLVMFuzzerTestOneInput (const uint8_t *data, size_t size)
 {
   if (size > MAXDATASIZE)	/* same as max_len = <MAXDATASIZE> in .options file */
     return 0;
