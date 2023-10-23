@@ -90,7 +90,7 @@ main (int argc, char *argv[])
   {
     unsigned int etype = 38;
     unsigned int my_str_len = 10;
-    unsigned char my_str[10];
+    unsigned char my_str[10] = "";
     unsigned int tl_len = 10;
     unsigned char tl[10];
 
