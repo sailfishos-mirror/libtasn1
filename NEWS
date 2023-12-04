@@ -533,8 +533,8 @@ GNU Libtasn1 NEWS                                     -*- outline -*-
 - Manage DEFAULT option with OBJECT IDENTIFIER
 
 * Noteworthy changes in release 0.2.3
-- Chenge asn1_find_structure_from_oid prototype
-- Chenge asn1_find_structure_from_oid prototype
+- Change asn1_find_structure_from_oid prototype
+- Change asn1_find_structure_from_oid prototype
 - Add ASN1_MEM_ALLOC_ERROR return value
 
 * Noteworthy changes in release 0.2.2
