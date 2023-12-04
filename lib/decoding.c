@@ -1899,7 +1899,7 @@ asn1_expand_any_defined_by (asn1_node_const definitions, asn1_node *element)
 				}
 			    }
 			  else
-			    {	/* error with the pointer to the structure to exapand */
+			    {	/* error with the pointer to the structure to expand */
 			      retCode = ASN1_ERROR_TYPE_ANY;
 			      break;
 			    }
@@ -2080,7 +2080,7 @@ asn1_expand_octet_string (asn1_node_const definitions, asn1_node *element,
 		    }
 		}
 	      else
-		{		/* error with the pointer to the structure to exapand */
+		{		/* error with the pointer to the structure to expand */
 		  retCode = ASN1_VALUE_NOT_VALID;
 		  break;
 		}

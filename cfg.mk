@@ -53,7 +53,7 @@ sc_prohibit_eol_brackets:
 
 sc_codespell:
 	@if `which codespell > /dev/null`; then \
-		codespell -L tim,sorce,ans --ignore-regex "/Fo|nNumber" `git ls-files|egrep -v '_fuzzer.in|_fuzzer.repro|gnulib|tests/.*.der|tests/TestIndef.*.p12|tests/built-in-type.asn|tests/crlf.cer|tests/invalid-assignments2.txt|windows/libtasn1.ncb|windows/libtasn1.suo$$'`; \
+		codespell -L tim,sorce,ans --ignore-regex "/Fo|nNumber" `git ls-files|egrep -v '_fuzzer.in|_fuzzer.repro|gnulib|tests/.*.der|tests/TestIndef.*.p12|tests/built-in-type.asn|tests/crlf.cer|tests/invalid-assignments..txt|windows/libtasn1.ncb|windows/libtasn1.suo$$'`; \
 	fi
 
 sc_libtool_version_bump:
