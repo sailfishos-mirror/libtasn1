@@ -42,7 +42,7 @@ exclude_file_name_regexp--sc_unmarked_diagnostics = ^tests/Test_tree.c$$
 exclude_file_name_regexp--sc_prohibit_undesirable_word_seq = ^msvc/.*$$
 exclude_file_name_regexp--sc_trailing_blank = ^msvc/.*|tests/(TestCertOctetOverflow.der|TestIndef.p12|TestIndef2.p12|TestIndef3.der|invalid-assignments2.txt)|tests/invalid-x509/id-.*$$
 exclude_file_name_regexp--sc_useless_cpp_parens = ^lib/includes/libtasn1.h$$
-exclude_file_name_regexp--sc_prohibit_eol_brackets = ^(autogen.sh|autopull.sh|bootstrap-funclib.sh|tests/.*|fuzz/.*|bootstrap)$$
+exclude_file_name_regexp--sc_prohibit_eol_brackets = ^(bootstrap-funclib.sh|tests/.*|fuzz/.*|bootstrap)$$
 exclude_file_name_regexp--sc_makefile_DISTCHECK_CONFIGURE_FLAGS = ^Makefile.am$$
 exclude_file_name_regexp--sc_unportable_grep_q = ^fuzz/(get_all_corpora|get_ossfuzz_corpora|run-clang.sh)$$
 
@@ -68,5 +68,5 @@ review-tag ?= $(shell git describe --abbrev=0)
 review-diff:
 	git diff $(review-tag).. \
 	| grep -v -e '^index' -e '^deleted file mode' -e '^new file mode' \
-	| filterdiff -p 1 -x 'build-aux/*' -x 'lib/gl*' -x 'po/*' -x 'maint.mk' -x '.gitignore' -x '.gitlab-ci.yml' -x .prev-version -x autogen.sh -x autopull.sh -x bootstrap -x bootstrap-funclib.sh \
+	| filterdiff -p 1 -x 'build-aux/*' -x 'lib/gl*' -x 'po/*' -x 'maint.mk' -x '.gitignore' -x '.gitlab-ci.yml' -x .prev-version -x bootstrap -x bootstrap-funclib.sh \
 	| less
