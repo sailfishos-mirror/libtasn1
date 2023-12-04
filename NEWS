@@ -1,7 +1,7 @@
 GNU Libtasn1 NEWS                                     -*- outline -*-
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
-
+- Update gnulib files and various build/maintenance fixes.
 
 * Noteworthy changes in release 4.19.0 (2022-08-23) [stable]
 - Clarify libtasn1.map license.  Closes: #38.
