@@ -241,6 +241,36 @@ static-analyzers:
     paths:
       - scan-build-lib/
 
+# https://www.synopsys.com/blogs/software-security/integrating-coverity-scan-with-gitlab-ci/
+Coverity:
+  rules:
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+  - when: manual
+  image: debian:12-slim
+  stage: build
+  allow_failure: true
+  before_script:
+  - apt-get update -qq | tail
+  - apt-get install -y -qq make git autoconf automake libtool bison curl | tail
+  script:
+  - test -n "$COVERITY_SCAN_TOKEN" && test -n "$COVERITY_SCAN_PROJECT_NAME"
+  - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64
+    --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
+  - sha1sum /tmp/cov-analysis-linux64.tgz
+  - tar xfz /tmp/cov-analysis-linux64.tgz
+  - time ./bootstrap --skip-po
+  - time ./configure --enable-gcc-warnings --disable-doc CFLAGS="-g -Og"
+  - cov-analysis-linux64-*/bin/cov-build --dir cov-int make check -j$(nproc)
+  - tar cfz cov-int.tar.gz cov-int
+  - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
+    --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
+    --form file=@cov-int.tar.gz --form version="`git describe --tags`"
+    --form description="`git describe --tags` / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - cov-int/*.txt
+
 armcross:
   extends: .test
   image: debian:11-slim
