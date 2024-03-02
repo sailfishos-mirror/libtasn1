@@ -251,7 +251,7 @@ Coverity:
   allow_failure: true
   before_script:
   - apt-get update -qq | tail
-  - apt-get install -y -qq make git autoconf automake libtool bison curl | tail
+  - apt-get install -y -qq make git autoconf automake libtool bison gtk-doc-tools curl | tail
   script:
   - test -n "$COVERITY_SCAN_TOKEN" && test -n "$COVERITY_SCAN_PROJECT_NAME"
   - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64
@@ -261,6 +261,7 @@ Coverity:
   - time ./bootstrap --skip-po
   - time ./configure --enable-gcc-warnings --disable-doc CFLAGS="-g -Og"
   - cov-analysis-linux64-*/bin/cov-build --dir cov-int make check -j$(nproc)
+  - cov-analysis-linux64-*/bin/cov-build version
   - tar cfz cov-int.tar.gz cov-int
   - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
     --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
