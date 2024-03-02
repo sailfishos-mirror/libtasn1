@@ -1,3 +1,24 @@
+# Copyright (C) 2016-2024 Free Software Foundation, Inc.
+#
+# This file is part of LIBTASN1.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+workflow:
+  rules:
+  - if: $CI_COMMIT_BRANCH
+
 variables:
   GIT_SUBMODULE_STRATEGY: normal
   BUILD_IMAGES_PROJECT: gnutls/build-images
@@ -261,7 +282,7 @@ Coverity:
   - time ./bootstrap --skip-po
   - time ./configure --enable-gcc-warnings --disable-doc CFLAGS="-g -Og"
   - cov-analysis-linux64-*/bin/cov-build --dir cov-int make check -j$(nproc)
-  - cov-analysis-linux64-*/bin/cov-build version
+  - cov-analysis-linux64-*/bin/cov-build version || true
   - tar cfz cov-int.tar.gz cov-int
   - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
     --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
