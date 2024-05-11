@@ -63,6 +63,38 @@ x86-64:
     paths:
       - libtasn1-*.tar.gz
 
+B-gcc:
+  image: gcc:latest
+  stage: build
+  before_script:
+  - apt-get update -qq
+  - apt-get install -y -qq --no-install-recommends bison texinfo help2man valgrind
+  script:
+  - gcc --version
+  - ./bootstrap
+  - ./configure CC="gcc -std=gnu2x"
+  - make V=1 VERBOSE=t check clean
+  - ./configure CC="gcc -std=c23"
+  - make V=1 all check dist
+  - git status
+  - git diff --exit-code
+
+B-clang:
+  image: silkeh/clang:latest
+  stage: build
+  before_script:
+  - apt-get update -qq
+  - apt-get install -y -qq --no-install-recommends git libtool bison texinfo help2man
+  script:
+  - clang --version
+  - ./bootstrap
+  - ./configure CC="clang -std=gnu2x"
+  - make V=1 VERBOSE=t check clean
+  - ./configure CC="clang -std=c23"
+  - make V=1 VERBOSE=t check dist
+  - git status
+  - git diff --exit-code
+
 Debian10-bootstrap:
   image: debian:10-slim
   stage: build
