@@ -48,8 +48,6 @@ x86-64:
   - make dist
   except:
   - tags
-  tags:
-  - shared
   artifacts:
     expire_in: 1 week
     when: on_failure
@@ -62,6 +60,38 @@ x86-64:
     when: on_success
     paths:
       - libtasn1-*.tar.gz
+
+B-gcc:
+  image: gcc:latest
+  stage: build
+  before_script:
+  - apt-get update -qq
+  - apt-get install -y -qq --no-install-recommends bison texinfo help2man valgrind
+  script:
+  - gcc --version
+  - ./bootstrap
+  - ./configure CC="gcc -std=gnu2x"
+  - make V=1 VERBOSE=t check clean
+  - ./configure CC="gcc -std=c23"
+  - make V=1 all check dist
+  - git status
+  - git diff --exit-code
+
+B-clang:
+  image: silkeh/clang:latest
+  stage: build
+  before_script:
+  - apt-get update -qq
+  - apt-get install -y -qq --no-install-recommends git libtool bison texinfo help2man
+  script:
+  - clang --version
+  - ./bootstrap
+  - ./configure CC="clang -std=gnu2x"
+  - make V=1 VERBOSE=t check clean
+  - ./configure CC="clang -std=c23"
+  - make V=1 VERBOSE=t check dist
+  - git status
+  - git diff --exit-code
 
 Debian10-bootstrap:
   image: debian:10-slim
@@ -133,8 +163,6 @@ valgrind/werror:
   - make -j$(nproc) check
   except:
   - tags
-  tags:
-  - shared
   artifacts:
     expire_in: 1 week
     when: on_failure
@@ -151,8 +179,6 @@ clang:
   - make check -j$(nproc)
   except:
   - tags
-  tags:
-  - shared
   artifacts:
     expire_in: 1 week
     when: on_failure
@@ -168,8 +194,6 @@ asan:
   - CFLAGS="-fsanitize=address -g -O2" LDFLAGS="-static-libasan" ./configure --disable-doc --disable-valgrind-tests && make -j$(nproc) && make check -j$(nproc)
   except:
   - tags
-  tags:
-  - shared
   artifacts:
     expire_in: 1 week
     when: on_failure
@@ -183,8 +207,6 @@ ubsan:
   - yum remove -y libtasn1-devel
   - ./bootstrap
   - CFLAGS="-fsanitize=undefined -fno-sanitize-recover -g -O2" ./configure --disable-doc --disable-valgrind-tests && make -j$(nproc) && make check -j$(nproc)
-  tags:
-  - shared
   except:
   - tags
   artifacts:
@@ -204,9 +226,6 @@ MinGW32-bootstrap:
   - ./bootstrap && rm -f tests/suite/mini-eagain2.c && mkdir -p build && cd build &&
     mingw32-configure --disable-doc --disable-valgrind-tests &&
     mingw32-make -j$(nproc) && mingw32-make -C tests check -j$(nproc)
-  tags:
-  - shared
-  - docker
   except:
   - tags
   artifacts:
@@ -229,8 +248,6 @@ gnutls:
   - cd gnutls-git && git submodule update --init && ./bootstrap &&
     ./configure --disable-cxx --disable-guile --disable-doc && make -j$(nproc) &&
     make -j $(nproc) check
-  tags:
-  - shared
   except:
   - tags
   artifacts:
@@ -252,8 +269,6 @@ static-analyzers:
   - make -j$(nproc) -C lib/gl
   - make -j$(nproc) -C lib ASN1.lo
   - scan-build --status-bugs -o scan-build-lib make -j$(nproc) -C lib
-  tags:
-  - shared
   except:
   - tags
   artifacts:
@@ -544,8 +559,6 @@ pcc:
   - make web-manual
   - rm -rf public/manual
   - mv doc/manual public/manual
-  tags:
-  - shared
   artifacts:
     when: on_success
     paths:
