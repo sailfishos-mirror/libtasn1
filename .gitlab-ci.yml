@@ -48,8 +48,6 @@ x86-64:
   - make dist
   except:
   - tags
-  tags:
-  - shared
   artifacts:
     expire_in: 1 week
     when: on_failure
@@ -165,8 +163,6 @@ valgrind/werror:
   - make -j$(nproc) check
   except:
   - tags
-  tags:
-  - shared
   artifacts:
     expire_in: 1 week
     when: on_failure
@@ -183,8 +179,6 @@ clang:
   - make check -j$(nproc)
   except:
   - tags
-  tags:
-  - shared
   artifacts:
     expire_in: 1 week
     when: on_failure
@@ -200,8 +194,6 @@ asan:
   - CFLAGS="-fsanitize=address -g -O2" LDFLAGS="-static-libasan" ./configure --disable-doc --disable-valgrind-tests && make -j$(nproc) && make check -j$(nproc)
   except:
   - tags
-  tags:
-  - shared
   artifacts:
     expire_in: 1 week
     when: on_failure
@@ -215,8 +207,6 @@ ubsan:
   - yum remove -y libtasn1-devel
   - ./bootstrap
   - CFLAGS="-fsanitize=undefined -fno-sanitize-recover -g -O2" ./configure --disable-doc --disable-valgrind-tests && make -j$(nproc) && make check -j$(nproc)
-  tags:
-  - shared
   except:
   - tags
   artifacts:
@@ -236,9 +226,6 @@ MinGW32-bootstrap:
   - ./bootstrap && rm -f tests/suite/mini-eagain2.c && mkdir -p build && cd build &&
     mingw32-configure --disable-doc --disable-valgrind-tests &&
     mingw32-make -j$(nproc) && mingw32-make -C tests check -j$(nproc)
-  tags:
-  - shared
-  - docker
   except:
   - tags
   artifacts:
@@ -261,8 +248,6 @@ gnutls:
   - cd gnutls-git && git submodule update --init && ./bootstrap &&
     ./configure --disable-cxx --disable-guile --disable-doc && make -j$(nproc) &&
     make -j $(nproc) check
-  tags:
-  - shared
   except:
   - tags
   artifacts:
@@ -284,8 +269,6 @@ static-analyzers:
   - make -j$(nproc) -C lib/gl
   - make -j$(nproc) -C lib ASN1.lo
   - scan-build --status-bugs -o scan-build-lib make -j$(nproc) -C lib
-  tags:
-  - shared
   except:
   - tags
   artifacts:
@@ -576,8 +559,6 @@ pcc:
   - make web-manual
   - rm -rf public/manual
   - mv doc/manual public/manual
-  tags:
-  - shared
   artifacts:
     when: on_success
     paths:
