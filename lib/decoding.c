@@ -1570,7 +1570,14 @@ asn1_der_decoding2 (asn1_node *element, const void *ider, int *max_ider_len,
 	    move = UP;
 	}
       if (move == UP)
-	p = _asn1_find_up (p);
+	{
+	  /* If we are parsing a sequence or set and p is a direct
+	     child of it, no need to traverse the list back to the leftmost node. */
+	  if (tcache.tail == p)
+	    p = tcache.head;
+	  else
+	    p = _asn1_find_up (p);
+	}
     }
 
   _asn1_delete_not_used (*element);
