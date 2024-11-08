@@ -31,6 +31,9 @@
 #include <structure.h>
 #include "parser_aux.h"
 #include <gstr.h>
+#include "c-ctype.h"
+#include "element.h"
+#include <limits.h>
 
 
 extern char _asn1_identifierMissing[];
@@ -390,6 +393,16 @@ asn1_delete_element (asn1_node structure, const char *element_name)
 
   if (source_node == NULL)
     return ASN1_ELEMENT_NOT_FOUND;
+
+  if (source_node->parent
+      && source_node->name[0] == '?'
+      && c_isdigit (source_node->name[1]))
+    {
+      long position = strtol (source_node->name + 1, NULL, 10);
+      if (position > 0 && position < LONG_MAX)
+	_asn1_node_array_set (&source_node->parent->numbered_children,
+			      position - 1, NULL);
+    }
 
   p2 = source_node->right;
   p3 = _asn1_find_left (source_node);

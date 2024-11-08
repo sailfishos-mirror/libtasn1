@@ -31,6 +31,12 @@
 
 # define ASN1_SMALL_VALUE_SIZE 16
 
+struct asn1_node_array_st
+{
+  asn1_node *nodes;
+  size_t size;
+};
+
 /* This structure is also in libtasn1.h, but then contains less
    fields.  You cannot make any modifications to these first fields
    without breaking ABI.  */
@@ -47,6 +53,8 @@ struct asn1_node_st
   asn1_node left;		/* Pointer to the next list element */
   /* private fields: */
   unsigned char small_value[ASN1_SMALL_VALUE_SIZE];	/* For small values */
+  asn1_node parent;		/* Pointer to the parent node */
+  struct asn1_node_array_st numbered_children; /* Array of unnamed child nodes for caching */
 
   /* values used during decoding/coding */
   int tmp_ival;

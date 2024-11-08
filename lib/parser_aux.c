@@ -126,6 +126,7 @@ asn1_find_node (asn1_node_const pointer, const char *name)
   const char *n_start;
   unsigned int nsize;
   unsigned int nhash;
+  const struct asn1_node_array_st *numbered_children;
 
   if (pointer == NULL)
     return NULL;
@@ -209,6 +210,7 @@ asn1_find_node (asn1_node_const pointer, const char *name)
       if (p->down == NULL)
 	return NULL;
 
+      numbered_children = &p->numbered_children;
       p = p->down;
       if (p == NULL)
 	return NULL;
@@ -222,6 +224,12 @@ asn1_find_node (asn1_node_const pointer, const char *name)
 	}
       else
 	{			/* no "?LAST" */
+	  if (n[0] == '?' && c_isdigit (n[1]))
+	    {
+	      long position = strtol (n + 1, NULL, 10);
+	      if (position > 0 && position < LONG_MAX)
+		p = _asn1_node_array_get (numbered_children, position - 1);
+	    }
 	  while (p)
 	    {
 	      if (p->name_hash == nhash && !strcmp (p->name, n))
@@ -509,6 +517,8 @@ _asn1_remove_node (asn1_node node, unsigned int flags)
       if (node->value != node->small_value)
 	free (node->value);
     }
+
+  free (node->numbered_children.nodes);
   free (node);
 }
 
