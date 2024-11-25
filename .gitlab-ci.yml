@@ -390,19 +390,19 @@ ArchLinux:
   - ./configure --enable-gcc-warnings
   - make check V=1
 
-CentOS7-distcheck:
+OracleLinux7:
   extends: .test
-  image: centos:7
+  image: oraclelinux:7
   stage: test
   needs: [Debian11-bootstrap]
   before_script:
-  - yum -y install make gcc diffutils valgrind gtk-doc texinfo
+  - yum -y install make gcc diffutils valgrind texinfo
   script:
   - tar xfa libtasn1-*.tar.gz
   - cd `ls -d libtasn1-* | grep -v tar.gz`
   - sed -i -e 's/ --sort=name//' GNUmakefile # C7's tar too old for 'make dist'
   - ./configure --enable-gcc-warnings
-  - make distcheck V=1 TEXI2DVI=true
+  - make check V=1 VERBOSE=t
 
 AlmaLinux8-c89:
   extends: .test
