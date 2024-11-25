@@ -20,7 +20,7 @@ if ENABLE_GTK_DOC
 SUBDIRS = reference
 endif
 
-EXTRA_DIST = gdoc TODO stamp_docs COPYING COPYING.LESSER
+EXTRA_DIST = gdoc TODO stamp_docs
 
 info_TEXINFOS = libtasn1.texi
 libtasn1_TEXINFOS = fdl-1.3.texi $(gdoc_TEXINFOS)
