@@ -1,3 +1,0 @@
-[submodule "gnulib"]
-	path = gnulib
-	url = https://gitlab.com/libidn/gnulib-mirror.git
