@@ -432,7 +432,7 @@ Debian4:
   - ./configure --enable-gcc-warnings
   - make check V=1 VERBOSE=t
 
-Debian8-distcheck:
+Debian8:
   extends: .test
   image: debian/eol:jessie
   stage: test
@@ -440,12 +440,12 @@ Debian8-distcheck:
   before_script:
   - printf "deb http://archive.debian.org/debian/ jessie main contrib non-free\ndeb http://archive.debian.org/debian/ jessie-backports main contrib non-free\ndeb http://archive.debian.org/debian-security/ jessie/updates main contrib non-free" > /etc/apt/sources.list
   - apt-get update -qq
-  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc gtk-doc-tools texinfo
+  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc
   script:
   - tar xfa libtasn1-*.tar.gz
   - cd `ls -d libtasn1-* | grep -v tar.gz`
-  - ./configure --enable-gcc-warnings
-  - make distcheck V=1 TEXI2DVI=true
+  - ./configure --enable-gcc-warnings --disable-doc
+  - make check V=1 VERBOSE=t
 
 Debian9-distcheck:
   extends: .test

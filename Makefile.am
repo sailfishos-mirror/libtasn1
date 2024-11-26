@@ -27,6 +27,7 @@ EXTRA_DIST = windows/asn1-parser/asn1-parser.vcproj			\
 	windows/test-parser/test-parser.vcproj				\
 	windows/test-tree/test-tree.vcproj windows/libtasn14win.mk
 EXTRA_DIST += cfg.mk maint.mk CONTRIBUTING.md README.md
+EXTRA_DIST += COPYING.LESSERv2
 
 SUBDIRS = lib src fuzz tests
 

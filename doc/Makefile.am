@@ -20,7 +20,7 @@ if ENABLE_GTK_DOC
 SUBDIRS = reference
 endif
 
-EXTRA_DIST = gdoc TODO stamp_docs COPYING COPYING.LESSER
+EXTRA_DIST = gdoc TODO stamp_docs
 
 info_TEXINFOS = libtasn1.texi
 libtasn1_TEXINFOS = fdl-1.3.texi $(gdoc_TEXINFOS)
@@ -193,7 +193,7 @@ stamp_docs: $(top_srcdir)/.version
 			-sourceversion $(VERSION) \
 			-include libtasn1.h \
 			-seeinfo $(PACKAGE) -verbatimcopying \
-			-copyright "2006-2023 Free Software Foundation, Inc." \
+			-copyright "2006-2024 Free Software Foundation, Inc." \
 			-function $$i \
 			$(GDOC_SRC) > man/$$i.3 && \
 		$(srcdir)/gdoc -texinfo -function $$i \
