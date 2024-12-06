@@ -106,7 +106,6 @@ Debian10-bootstrap:
   - ../configure --enable-gcc-warnings
   - make -j$(nproc)
   - make -j$(nproc) check
-  - make abi-check
   - make syntax-check distcheck
   - git diff --exit-code # nothing should change version controlled files
   artifacts:
@@ -117,6 +116,25 @@ Debian10-bootstrap:
 
 Debian11-bootstrap:
   image: debian:11-slim
+  stage: build
+  before_script:
+  - apt-get update -qq
+  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind abigail-tools codespell | tail
+  script:
+  - ./bootstrap
+  - ./configure --enable-gcc-warnings
+  - make -j$(nproc)
+  - make -j$(nproc) check
+  - make syntax-check dist
+  - git diff --exit-code # nothing should change version controlled files
+  artifacts:
+    expire_in: 2 weeks
+    when: on_success
+    paths:
+      - libtasn1-*.tar.gz
+
+Debian12-bootstrap:
+  image: debian:12-slim
   stage: build
   before_script:
   - apt-get update -qq
