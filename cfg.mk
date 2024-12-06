@@ -46,6 +46,8 @@ exclude_file_name_regexp--sc_prohibit_eol_brackets = ^(bootstrap-funclib.sh|test
 exclude_file_name_regexp--sc_makefile_DISTCHECK_CONFIGURE_FLAGS = ^Makefile.am$$
 exclude_file_name_regexp--sc_unportable_grep_q = ^fuzz/(get_all_corpora|get_ossfuzz_corpora|run-clang.sh)$$
 
+TAR_OPTIONS += --mode=go+u,go-w --mtime=$(abs_top_srcdir)/NEWS
+
 sc_prohibit_eol_brackets:
 	@prohibit='.+\) *{$$' \
 	halt='please block bracket { use in a separate line' \

@@ -107,6 +107,24 @@ dist-hook: gen-ChangeLog
 		make -C doc/ compare-makefile; \
 	fi
 
+dist-hook: srcdist
+.PHONY: srcdist
+srcdist:
+	$(AM_V_GEN)if test -e $(srcdir)/.git \
+			&& command -v git > /dev/null; then \
+	 cd $(srcdir) && \
+	   git archive --prefix=$(PACKAGE)-$$(git describe)/ \
+	       -o $(abs_builddir)/$(PACKAGE)-$$(git describe)-src.tar.gz HEAD; \
+	fi
+
+dist-hook: mtime-NEWS-to-git-HEAD
+.PHONY: mtime-NEWS-to-git-HEAD
+mtime-NEWS-to-git-HEAD:
+	$(AM_V_GEN)if test -e $(srcdir)/.git \
+			&& command -v git > /dev/null; then \
+		touch -m -d @"$$(git log -1 --format=%ct)" $(srcdir)/NEWS; \
+	fi
+
 .PHONY: gen-ChangeLog
 gen-ChangeLog:
 	$(AM_V_GEN)if test -d .git; then				\
