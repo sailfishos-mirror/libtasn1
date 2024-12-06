@@ -29,11 +29,13 @@ EXTRA_DIST = windows/asn1-parser/asn1-parser.vcproj			\
 EXTRA_DIST += cfg.mk maint.mk CONTRIBUTING.md README.md
 EXTRA_DIST += COPYING.LESSERv2
 
-SUBDIRS = lib src fuzz tests
+SUBDIRS = lib src
 
 if ENABLE_DOC
 SUBDIRS += doc examples
 endif
+
+SUBDIRS += fuzz tests
 
 include $(top_srcdir)/aminclude_static.am
 
