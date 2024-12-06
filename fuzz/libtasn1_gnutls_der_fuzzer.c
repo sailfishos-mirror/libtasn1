@@ -166,11 +166,13 @@ LLVMFuzzerTestOneInput (const uint8_t *data, size_t size)
 	   asn1_write_value (dn, "digestParamSet", "1.2.643.7.1.1.2.2",
 			     1)) == ASN1_SUCCESS)
 	{
+	  int dersize;
+
 	  /* from cert_get_issuer_dn() */
 	  res = asn1_der_decoding (&dn, data, size, NULL);
 
 	  /* from _gnutls_x509_der_encode() */
-	  int dersize = 0;
+	  dersize = 0;
 	  if ((res =
 	       asn1_der_coding (dn, "", NULL, &dersize,
 				NULL)) == ASN1_MEM_ERROR)

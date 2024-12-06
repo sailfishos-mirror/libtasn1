@@ -94,6 +94,11 @@ test_all_from (const char *dirname)
     {
       while ((dp = readdir (dirp)))
 	{
+	  int fd;
+	  struct stat st;
+	  uint8_t *data;
+	  ssize_t n;
+
 	  if (*dp->d_name == '.')
 	    continue;
 
@@ -106,14 +111,12 @@ test_all_from (const char *dirname)
 	      continue;
 	    }
 
-	  int fd;
 	  if ((fd = open (fname, O_RDONLY)) == -1)
 	    {
 	      fprintf (stderr, "Failed to open %s (%d)\n", fname, errno);
 	      continue;
 	    }
 
-	  struct stat st;
 	  if (fstat (fd, &st) != 0)
 	    {
 	      fprintf (stderr, "Failed to stat %d (%d)\n", fd, errno);
@@ -121,8 +124,7 @@ test_all_from (const char *dirname)
 	      continue;
 	    }
 
-	  uint8_t *data = malloc (st.st_size);
-	  ssize_t n;
+	  data = malloc (st.st_size);
 	  if ((n = read (fd, data, st.st_size)) == st.st_size)
 	    {
 	      printf ("testing %llu bytes from '%s'\n",
@@ -145,6 +147,8 @@ int
 main (int argc, char **argv)
 {
   int len;
+  const char *target;
+  char corporadir[1024];	/* avoid alloca / VLA / heap allocation */
 
   /* if VALGRIND testing is enabled, we have to call ourselves with valgrind checking */
   if (argc == 1)
@@ -168,10 +172,8 @@ main (int argc, char **argv)
   if (argc > 1)
     return test_single_file (argv[1]);
 
-  const char *target = strrchr (argv[0], '/');
+  target = strrchr (argv[0], '/');
   target = target ? target + 1 : argv[0];
-
-  char corporadir[1024];	/* avoid alloca / VLA / heap allocation */
 
   len = snprintf (corporadir, sizeof (corporadir), SRCDIR "/%s.in", target);
   if (len < 0 || len >= (int) sizeof (corporadir))

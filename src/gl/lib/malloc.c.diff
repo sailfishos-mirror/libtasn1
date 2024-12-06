@@ -1,0 +1,22 @@
+diff --git a/lib/malloc.c b/lib/malloc.c
+index 045ff82c1a..6a1253090a 100644
+--- a/lib/malloc.c
++++ b/lib/malloc.c
+@@ -31,6 +31,8 @@
+ void *
+ rpl_malloc (size_t n)
+ {
++  void *result;
++
+ #if !HAVE_MALLOC_0_NONNULL
+   if (n == 0)
+     n = 1;
+@@ -45,7 +47,7 @@ rpl_malloc (size_t n)
+     }
+ #endif
+ 
+-  void *result = malloc (n);
++  result = malloc (n);
+ 
+ #if !HAVE_MALLOC_POSIX
+   if (result == NULL)

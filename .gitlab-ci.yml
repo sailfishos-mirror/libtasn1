@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+variables:
+  GNULIB_URL: https://gitlab.com/libidn/gnulib-mirror.git
+
 workflow:
   rules:
   - if: $CI_COMMIT_BRANCH
@@ -25,15 +28,24 @@ variables:
   FEDORA_BUILD: buildenv-fedora33
   GET_SOURCES_ATTEMPTS: "3"
 
-.test:
+default:
+  interruptible: true
   artifacts:
     expire_in: 2 weeks
     when: always
     paths:
     - "*.tar.gz"
+    - ./**/*.log
     - ./*.log
     - ./config.h
-    - ./**/*.log
+    - ./tar/**
+
+.repro:
+  script:
+  - sha256sum *.tar.*
+  - mkdir -pv tar/$CI_JOB_NAME_SLUG/src
+  - mv -v *.tar.* tar/$CI_JOB_NAME_SLUG/
+  - (! ls tar/$CI_JOB_NAME_SLUG/*-src.tar.*) || mv -v tar/$CI_JOB_NAME_SLUG/*-src.tar.* tar/$CI_JOB_NAME_SLUG/src/
 
 # See http://doc.gitlab.com/ce/ci/yaml/ for documentation.
 x86-64:
@@ -76,6 +88,7 @@ B-gcc:
   - make V=1 all check dist
   - git status
   - git diff --exit-code
+  - !reference [.repro, script]
 
 B-clang:
   image: silkeh/clang:latest
@@ -92,13 +105,14 @@ B-clang:
   - make V=1 VERBOSE=t check dist
   - git status
   - git diff --exit-code
+  - !reference [.repro, script]
 
-Debian10-bootstrap:
+B-Debian10:
   image: debian:10-slim
   stage: build
   before_script:
   - apt-get update -qq | tail
-  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make git autoconf automake libtool bison texinfo texlive texlive-generic-recommended texlive-extra-utils help2man gtk-doc-tools valgrind abigail-tools | tail
+  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make git autoconf automake libtool bison texinfo texlive texlive-generic-recommended texlive-extra-utils help2man gtk-doc-tools valgrind | tail
   script:
   - ./bootstrap
   - mkdir b
@@ -107,70 +121,179 @@ Debian10-bootstrap:
   - make -j$(nproc)
   - make -j$(nproc) check
   - make syntax-check distcheck
-  - git diff --exit-code # nothing should change version controlled files
-  artifacts:
-    expire_in: 2 weeks
-    when: on_success
-    paths:
-      - b/libtasn1-*.tar.gz
+  - git status
+  - git diff --exit-code
+  - !reference [.repro, script]
 
-Debian11-bootstrap:
-  image: debian:11-slim
-  stage: build
-  before_script:
-  - apt-get update -qq
-  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind abigail-tools codespell | tail
-  script:
-  - ./bootstrap
-  - ./configure --enable-gcc-warnings
-  - make -j$(nproc)
-  - make -j$(nproc) check
-  - make syntax-check dist
-  - git diff --exit-code # nothing should change version controlled files
-  artifacts:
-    expire_in: 2 weeks
-    when: on_success
-    paths:
-      - libtasn1-*.tar.gz
-
-Debian12-bootstrap:
-  image: debian:12-slim
-  stage: build
-  before_script:
-  - apt-get update -qq
-  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind abigail-tools codespell | tail
-  script:
-  - ./bootstrap
-  - ./configure --enable-gcc-warnings
-  - make -j$(nproc)
-  - make -j$(nproc) check
-  - make abi-check
-  - make syntax-check dist
-  - git diff --exit-code # nothing should change version controlled files
-  artifacts:
-    expire_in: 2 weeks
-    when: on_success
-    paths:
-      - libtasn1-*.tar.gz
-
-Debian-testing-bootstrap:
+B-Debian-testing-abicheck:
   image: debian:testing-slim
+  tags: [ saas-linux-medium-amd64 ]
   stage: build
+  variables:
+    DEBIAN_FRONTEND: noninteractive
   before_script:
+  - cat /etc/os-release
   - apt-get update -qq
-  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind abigail-tools indent codespell | tail
+  - apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind abigail-tools indent codespell
   script:
-  - ./bootstrap
-  - ./configure --enable-gcc-warnings
-  - make -j$(nproc)
-  - make -j$(nproc) check
-  - make syntax-check distcheck
+  - time ./bootstrap --skip-po
+  - time ./configure --enable-gcc-warnings
+  - time make syntax-check
+  - time make -j$(nproc) V=1 VERBOSE=t
+  - time make abi-check
+  - time make -j$(nproc) V=1 VERBOSE=t check
+  - time make -j$(nproc) V=1 VERBOSE=t distcheck
+  - git status
+  - git diff --exit-code
+  - !reference [.repro, script]
+
+.almarocky: &almarocky
+  stage: build
+  tags: [ saas-linux-medium-amd64 ]
+  variables:
+    PKGS: patch findutils autoconf automake git make bison gcc libtool diffutils gtk-doc help2man texinfo texinfo-tex valgrind
+  before_script:
+  - cat /etc/os-release
+  - dnf install -y epel-release
+  - dnf --enablerepo=$(dnf repolist --all | grep crb > /dev/null && echo crb || echo powertools) install -y ${PKGS}
+  - cc --version
+  script:
+  - time ./bootstrap --skip-po
+  - time ./configure --enable-gcc-warnings
+  - time make syntax-check
+  - time make -j$(nproc) V=1 VERBOSE=t check
+  - time make -j$(nproc) V=1 VERBOSE=t distcheck
+  - git status
+  - git diff --exit-code
+  - !reference [.repro, script]
+
+B-AlmaLinux8:
+  image: almalinux:8
+  extends: .almarocky
+
+B-RockyLinux8:
+  image: rockylinux:8
+  extends: .almarocky
+
+B-AlmaLinux9:
+  image: almalinux:9
+  extends: .almarocky
+
+B-RockyLinux9:
+  image: rockylinux:9
+  extends: .almarocky
+
+.pureosdebian: &pureosdebian
+  tags: [ saas-linux-medium-amd64 ]
+  stage: build
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+  before_script:
+  - cat /etc/os-release
+  - apt-get update -qq
+  - apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind
+  script:
+  - time ./bootstrap --skip-po
+  - time ./configure --enable-gcc-warnings
+  - time make syntax-check
+  - time make -j$(nproc) V=1 VERBOSE=t check
+  - time make -j$(nproc) V=1 VERBOSE=t distcheck
+  - git status
+  - git diff --exit-code
+  - !reference [.repro, script]
+
+B-PureOS10:
+  image: pureos/byzantium:latest
+  extends: .pureosdebian
+
+B-Debian11:
+  image: debian:11-slim
+  extends: .pureosdebian
+
+B-Devuan5:
+  image: devuan/devuan:daedalus
+  extends: .pureosdebian
+
+B-Debian12:
+  image: debian:12-slim
+  extends: .pureosdebian
+
+.trisquelubuntu: &trisquelubuntu
+  tags: [ saas-linux-medium-amd64 ]
+  stage: build
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+  before_script:
+  - cat /etc/os-release
+  - apt-get update -qq
+  - apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind
+  script:
+  - time ./bootstrap --skip-po
+  - time ./configure --enable-gcc-warnings
+  - time make syntax-check
+  - time make -j$(nproc) V=1 VERBOSE=t check
+  - time make -j$(nproc) V=1 VERBOSE=t distcheck
+  - git status
+  - git diff --exit-code
+  - !reference [.repro, script]
+
+B-Ubuntu2204:
+  image: ubuntu:22.04
+  extends: .trisquelubuntu
+
+B-Trisquel11:
+  image: kpengboy/trisquel:11.0
+  extends: .trisquelubuntu
+
+# https://docs.gitlab.com/ee/ci/runners/hosted_runners/macos.html
+B-macOS14Xcode15:
+  allow_failure: true
+  stage: build
+  image: macos-14-xcode-15
+  tags: [ saas-macos-medium-m1 ]
+  variables:
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_INSTALL_UPGRADE: 1
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+  before_script:
+  - brew install autoconf automake libtool gengetopt help2man texinfo coreutils
+  script:
+  - time ./bootstrap --skip-po
+  - time ./configure --enable-gcc-warnings
+  - make syntax-check
+  - time make -j$(nproc) check -k V=1 VERBOSE=t
   - git diff --exit-code # nothing should change version controlled files
-  artifacts:
-    expire_in: 2 weeks
-    when: on_success
-    paths:
-      - libtasn1-*.tar.gz
+  - !reference [.repro, script]
+
+000-reproducibility:
+  stage: test
+  needs: [ B-AlmaLinux8, B-AlmaLinux9, B-RockyLinux8, B-RockyLinux9, B-Trisquel11, B-Ubuntu2204, B-PureOS10, B-Debian11, B-Devuan5, B-Debian12, B-gcc, B-clang, B-Debian10, B-macOS14Xcode15 ]
+  script:
+  - cd tar
+  - sha256sum */*.tar.* */src/*.tar.* | sort
+  - sha256sum */*.tar.* */src/*.tar.* | sort | uniq -c -w64 | sort -rn
+  - sha256sum */*.tar.* */src/*.tar.* | grep    -- -src.tar. | sort | uniq -c -w64 | grep -v '^      1 '
+  - sha256sum */*.tar.* */src/*.tar.* | grep -v -- -src.tar. | sort | uniq -c -w64 | grep -v '^      1 '
+  - |
+    : Confirm modern git-archive output reproducibility
+  - cmp b-almalinux8/src/*.tar.gz b-almalinux9/src/*.tar.gz
+  - cmp b-almalinux8/src/*.tar.gz b-rockylinux8/src/*.tar.gz
+  - cmp b-almalinux8/src/*.tar.gz b-rockylinux9/src/*.tar.gz
+  - cmp b-almalinux8/src/*.tar.gz b-debian12/src/*.tar.gz
+  - cmp b-almalinux8/src/*.tar.gz b-devuan5/src/*.tar.gz
+  - |
+    : Confirm old git-archive output reproducibility
+  - cmp b-debian11/src/*.tar.gz b-pureos10/src/*.tar.gz
+  - cmp b-debian11/src/*.tar.gz b-trisquel11/src/*.tar.gz
+  - cmp b-debian11/src/*.tar.gz b-ubuntu2204/src/*.tar.gz
+  - |
+    : Confirm non-minimal generated tarball reproducibility
+  - cmp b-almalinux8/*.tar.gz b-rockylinux8/*.tar.gz
+  - cmp b-almalinux9/*.tar.gz b-rockylinux9/*.tar.gz
+  - cmp b-pureos10/*.tar.gz b-debian11/*.tar.gz
+  - cmp b-devuan5/*.tar.gz b-debian12/*.tar.gz
+  - cmp b-trisquel11/*.tar.gz b-ubuntu2204/*.tar.gz
 
 valgrind/werror:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
@@ -327,17 +450,16 @@ Coverity:
       - cov-int/*.txt
 
 armcross:
-  extends: .test
   image: debian:11-slim
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -q make gcc-arm-linux-gnueabi qemu-user qemu-user-binfmt file
   - update-binfmts --enable qemu-arm
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - mkdir b
   - cd b
   - ../configure --host=arm-linux-gnueabi --enable-gcc-warnings CFLAGS="-static --static"
@@ -349,204 +471,235 @@ armcross:
   - make check
 
 Mingw32:
-  extends: .test
   image: debian:11-slim
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - dpkg --add-architecture i386
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make mingw-w64 wine wine32 libwine libwine:i386 binfmt-support wine-binfmt
   - update-binfmts --enable wine
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure --host=i686-w64-mingw32 CC='i686-w64-mingw32-gcc -static-libgcc' --enable-gcc-warnings
   - make check V=1
 
 Mingw64:
-  extends: .test
   image: debian:11-slim
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make mingw-w64 wine wine64 binfmt-support wine-binfmt
   - update-binfmts --enable wine
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure  --host=x86_64-w64-mingw32 --enable-gcc-warnings
   - make check V=1
 
 Alpine:
-  extends: .test
   image: alpine:latest
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - echo "ipv6" >> /etc/modules
   - apk update
   - apk add build-base
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure --enable-gcc-warnings
   - sed -i 's/UNKNOWN/10.11.12/g' tests/version.c # XXX FIXME alpine bug?
   - make check V=1
 
 ArchLinux:
-  extends: .test
   image: archlinux:latest
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - pacman -Sy --noconfirm make gcc diffutils
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure --enable-gcc-warnings
   - make check V=1
 
 OracleLinux7:
-  extends: .test
   image: oraclelinux:7
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - yum -y install make gcc diffutils valgrind texinfo
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - sed -i -e 's/ --sort=name//' GNUmakefile # C7's tar too old for 'make dist'
   - ./configure --enable-gcc-warnings
   - make check V=1 VERBOSE=t
 
 AlmaLinux8-c89:
-  extends: .test
   image: almalinux:8
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - yum -y install make gcc diffutils
   script:
-  - tar xfz libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure --enable-gcc-warnings ac_cv_prog_cc_c11=-std=c89
   - make check V=1 VERBOSE=t WERROR_CFLAGS='-Dinline= -Werror -Wno-error=unused-function -Wno-error=nested-externs -Wno-error=implicit-function-declaration'
 
+Debian3:
+  image: debian/eol:woody
+  stage: test
+  needs: [B-Trisquel11]
+  before_script:
+  - apt-get update
+  - apt-get install -y -qq make gcc libc-dev
+  script:
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
+  - time ./configure --enable-gcc-warnings
+  - time make check V=1 VERBOSE=t
+
+Debian3.1:
+  image: debian/eol:sarge
+  stage: test
+  needs: [B-Trisquel11]
+  before_script:
+  - apt-get update
+  - apt-get install -y -qq make gcc libc-dev
+  script:
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
+  - time ./configure --enable-gcc-warnings
+  - time make check V=1 VERBOSE=t
+
 Debian4:
-  extends: .test
   image: debian/eol:etch
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
-  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc libc-dev
+  - apt-get install -y -qq make gcc libc-dev
   - dpkg -l | cat
   script:
-  - tar xfz libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
-  - ./configure --enable-gcc-warnings
-  - make check V=1 VERBOSE=t
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
+  - time ./configure --enable-gcc-warnings
+  - time make check V=1 VERBOSE=t
 
 Debian8:
-  extends: .test
   image: debian/eol:jessie
   stage: test
-  needs: [x86-64]
+  needs: [B-Trisquel11]
   before_script:
   - printf "deb http://archive.debian.org/debian/ jessie main contrib non-free\ndeb http://archive.debian.org/debian/ jessie-backports main contrib non-free\ndeb http://archive.debian.org/debian-security/ jessie/updates main contrib non-free" > /etc/apt/sources.list
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure --enable-gcc-warnings --disable-doc
   - make check V=1 VERBOSE=t
 
 Debian9-distcheck:
-  extends: .test
   image: debian:9-slim
   stage: test
-  needs: [x86-64]
+  needs: [B-Trisquel11]
   before_script:
   - printf "deb http://archive.debian.org/debian/ stretch main contrib non-free\ndeb http://archive.debian.org/debian/ stretch-backports main contrib non-free\ndeb http://archive.debian.org/debian-security/ stretch/updates main contrib non-free" > /etc/apt/sources.list
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc gtk-doc-tools texinfo texlive texlive-generic-recommended texlive-extra-utils
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure --enable-gcc-warnings
   - make distcheck V=1
+  - !reference [.repro, script]
 
 Debian11-distcheck:
-  extends: .test
   image: debian:11-slim
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc gtk-doc-tools texinfo
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure --enable-gcc-warnings
   - make distcheck V=1
+  - !reference [.repro, script]
+
+macOS13Xcode14:
+  allow_failure: true
+  image: macos-13-xcode-14
+  tags: [ saas-macos-medium-m1 ]
+  stage: test
+  needs: [B-Trisquel11]
+  script:
+  - gzip -cd tar/b-trisquel11/libtasn1-*.tar.gz | tar xf -
+  - cd $(gzip -cd tar/b-trisquel11/libtasn1-*.tar.gz | tar tf - | head -n1)
+  - mkdir b
+  - cd b
+  - ../configure --enable-gcc-warnings
+  - make -j$(nproc) syntax-check
+  - make -j$(nproc) V=1 check -k VERBOSE=t
 
 Ubuntu-latest-distcheck:
-  extends: .test
   image: ubuntu:latest
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc gtk-doc-tools texinfo
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure --enable-gcc-warnings
   - make distcheck V=1
+  - !reference [.repro, script]
 
 Ubuntu-rolling-distcheck:
-  extends: .test
   image: ubuntu:rolling
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc gtk-doc-tools texinfo
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure --enable-gcc-warnings
   - make distcheck V=1
+  - !reference [.repro, script]
 
 tcc-lld:
-  extends: .test
   image: debian:11-slim
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make tcc binutils lld
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure CC=tcc LD=lld --disable-shared
   - make check V=1 VERBOSE=t
 
 pcc:
-  extends: .test
   image: debian:11-slim
   stage: test
-  needs: [Debian11-bootstrap]
+  needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make pcc binutils libc6-dev libtasn1-bin
   script:
-  - tar xfa libtasn1-*.tar.gz
-  - cd `ls -d libtasn1-* | grep -v tar.gz`
+  - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
+  - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - ./configure CC=pcc
   - make V=1 VERBOSE=t -C lib
   - make V=1 VERBOSE=t -C fuzz check

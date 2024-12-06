@@ -1,0 +1,31 @@
+diff --git a/lib/realloc.c b/lib/realloc.c
+index 58044745f4..26e2e0dbfc 100644
+--- a/lib/realloc.c
++++ b/lib/realloc.c
+@@ -42,6 +42,7 @@ void *
+ rpl_realloc (void *p, size_t n)
+ {
+   size_t n1 = n;
++  void *result;
+ 
+   if (n == 0)
+     {
+@@ -84,15 +85,15 @@ rpl_realloc (void *p, size_t n)
+     }
+ 
+ # if !HAVE_MALLOC_PTRDIFF
+-  ptrdiff_t signed_n;
++  {ptrdiff_t signed_n;
+   if (ckd_add (&signed_n, n, 0))
+     {
+       errno = ENOMEM;
+       return NULL;
+-    }
++    }}
+ # endif
+ 
+-  void *result = realloc (p, n1);
++  result = realloc (p, n1);
+ 
+ # if !HAVE_MALLOC_POSIX
+   if (result == NULL)

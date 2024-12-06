@@ -29,11 +29,13 @@ EXTRA_DIST = windows/asn1-parser/asn1-parser.vcproj			\
 EXTRA_DIST += cfg.mk maint.mk CONTRIBUTING.md README.md
 EXTRA_DIST += COPYING.LESSERv2
 
-SUBDIRS = lib src fuzz tests
+SUBDIRS = lib src
 
 if ENABLE_DOC
 SUBDIRS += doc examples
 endif
+
+SUBDIRS += fuzz tests
 
 include $(top_srcdir)/aminclude_static.am
 
@@ -103,6 +105,24 @@ dist-hook: gen-ChangeLog
 	if test -d "$(top_srcdir)/devel"; then \
 		$(MAKE) -C $(top_builddir) abi-check-latest; \
 		make -C doc/ compare-makefile; \
+	fi
+
+dist-hook: srcdist
+.PHONY: srcdist
+srcdist:
+	$(AM_V_GEN)if test -e $(srcdir)/.git \
+			&& command -v git > /dev/null; then \
+	 cd $(srcdir) && \
+	   git archive --prefix=$(PACKAGE)-$$(git describe)/ \
+	       -o $(abs_builddir)/$(PACKAGE)-$$(git describe)-src.tar.gz HEAD; \
+	fi
+
+dist-hook: mtime-NEWS-to-git-HEAD
+.PHONY: mtime-NEWS-to-git-HEAD
+mtime-NEWS-to-git-HEAD:
+	$(AM_V_GEN)if test -e $(srcdir)/.git \
+			&& command -v git > /dev/null; then \
+		touch -m -d @"$$(git log -1 --format=%ct)" $(srcdir)/NEWS; \
 	fi
 
 .PHONY: gen-ChangeLog
