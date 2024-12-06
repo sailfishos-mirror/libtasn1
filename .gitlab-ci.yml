@@ -257,7 +257,7 @@ B-macOS14Xcode15:
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
   before_script:
-  - brew install autoconf automake libtool gengetopt help2man texinfo coreutils
+  - brew install autoconf automake libtool gengetopt bison help2man texinfo coreutils
   script:
   - time ./bootstrap --skip-po
   - time ./configure --enable-gcc-warnings
@@ -266,9 +266,42 @@ B-macOS14Xcode15:
   - git diff --exit-code # nothing should change version controlled files
   - !reference [.repro, script]
 
+B-Ubuntu2404-release:
+  image: ubuntu:24.04
+  tags: [ saas-linux-medium-amd64 ]
+  stage: build
+  except:
+  - tags # do-release-commit-and-tag: not on branch
+  before_script:
+  - cat /etc/os-release
+  - apt-get update -qq
+  - apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind codespell
+  script:
+  - time ./bootstrap --skip-po
+  - time ./configure --enable-gcc-warnings
+  - time make -j$(nproc) syntax-check
+  - time make -j$(nproc) check V=1 VERBOSE=t
+  - time make -j$(nproc) distcheck
+  - git status
+  - git diff --exit-code # nothing should change version controlled files
+  - apt-get install -y -q gpg gpgv
+  - gpg --batch --passphrase '' --quick-gen-key pipeline@example.org
+  - git checkout $CI_COMMIT_BRANCH
+  - git config user.email "pipeline@example.org"
+  - git config user.name "Pipeline Builder"
+  - git config user.signingkey pipeline@example.org
+  - sed -i '4i - WARNING This release was prepared automatically with no testing.' NEWS
+  - git commit -m "Warn about automatic release." NEWS
+  - make release-commit RELEASE='17.42.23 stable'
+  - make
+  - make release RELEASE='17.42.23 stable' V=1 VERBOSE=t
+  - cat -n ~/announce-*-17.42.23
+  - git diff --exit-code # nothing should change version controlled files
+  - !reference [.repro, script]
+
 000-reproducibility:
   stage: test
-  needs: [ B-AlmaLinux8, B-AlmaLinux9, B-RockyLinux8, B-RockyLinux9, B-Trisquel11, B-Ubuntu2204, B-PureOS10, B-Debian11, B-Devuan5, B-Debian12, B-gcc, B-clang, B-Debian10, B-macOS14Xcode15 ]
+  needs: [ B-AlmaLinux8, B-AlmaLinux9, B-RockyLinux8, B-RockyLinux9, B-Trisquel11, B-Ubuntu2204, B-PureOS10, B-Debian11, B-Devuan5, B-Debian12, B-gcc, B-clang, B-Debian10, B-macOS14Xcode15, B-Ubuntu2404-release ]
   script:
   - cd tar
   - sha256sum */*.tar.* */src/*.tar.* | sort
@@ -282,6 +315,7 @@ B-macOS14Xcode15:
   - cmp b-almalinux8/src/*.tar.gz b-rockylinux9/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz b-debian12/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz b-devuan5/src/*.tar.gz
+  - cmp b-almalinux8/src/*.tar.gz b-ubuntu2404-release/src/*v4*.tar.gz
   - |
     : Confirm old git-archive output reproducibility
   - cmp b-debian11/src/*.tar.gz b-pureos10/src/*.tar.gz
