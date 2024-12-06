@@ -49,16 +49,20 @@ struct fuzz_elem
 int
 LLVMFuzzerTestOneInput (const uint8_t *data, size_t size)
 {
-  if (size > MAXDATASIZE)	/* same as max_len = <MAXDATASIZE> in .options file */
-    return 0;
-
-  struct fuzz_elem *elem = (struct fuzz_elem *) malloc (size);
-  assert (elem != NULL);
-  memcpy (elem, data, size);
-
+  struct fuzz_elem *elem;
   int nelem = size / sizeof (struct fuzz_elem);
   asn1_static_node tab[MAXELEM + 1];	/* avoid VLA here */
   int it;
+  int result;
+  asn1_node node = NULL;
+  char errorDescription[ASN1_MAX_ERROR_DESCRIPTION_SIZE];
+
+  if (size > MAXDATASIZE)	/* same as max_len = <MAXDATASIZE> in .options file */
+    return 0;
+
+  elem = (struct fuzz_elem *) malloc (size);
+  assert (elem != NULL);
+  memcpy (elem, data, size);
 
   for (it = 0; it < nelem; it++)
     {
@@ -79,10 +83,6 @@ LLVMFuzzerTestOneInput (const uint8_t *data, size_t size)
   tab[nelem].type = 0;
   tab[nelem].name = NULL;
   tab[nelem].value = NULL;
-
-  int result;
-  asn1_node node = NULL;
-  char errorDescription[ASN1_MAX_ERROR_DESCRIPTION_SIZE];
 
   result = asn1_array2tree (tab, &node, errorDescription);
 

@@ -54,6 +54,7 @@ LLVMFuzzerTestOneInput (const uint8_t *data, size_t size)
 {
   char errorDescription[ASN1_MAX_ERROR_DESCRIPTION_SIZE];
   asn1_node definitions = NULL;
+  int rc;
 
   if (size > 10000)		/* same as max_len = 10000 in .options file */
     return 0;
@@ -61,7 +62,7 @@ LLVMFuzzerTestOneInput (const uint8_t *data, size_t size)
   g_data = data;
   g_size = size;
 
-  int rc = asn1_parser2tree ("pkix.asn", &definitions, errorDescription);
+  rc = asn1_parser2tree ("pkix.asn", &definitions, errorDescription);
   if (rc == ASN1_SUCCESS)
     {
       asn1_delete_structure (&definitions);

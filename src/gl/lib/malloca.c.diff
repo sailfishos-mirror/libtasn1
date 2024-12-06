@@ -1,0 +1,26 @@
+diff --git a/lib/malloca.c b/lib/malloca.c
+--- a/lib/malloca.c
++++ b/lib/malloca.c
+@@ -68,16 +68,19 @@
+           /* The ckd_add avoids signed integer overflow on
+              theoretical platforms where UINTPTR_MAX <= INT_MAX.  */
+           uintptr_t umemplus;
++	  idx_t offset;
++	  void *p;
++	  small_t *sp;
+           ckd_add (&umemplus, umem, sizeof (small_t) + sa_alignment_max - 1);
+-          idx_t offset = (umemplus - umemplus % (2 * sa_alignment_max)
++          offset = (umemplus - umemplus % (2 * sa_alignment_max)
+                           + sa_alignment_max - umem);
+-          void *p = mem + offset;
++          p = mem + offset;
+           /* Here p >= mem + sizeof (small_t),
+              and p <= mem + sizeof (small_t) + 2 * sa_alignment_max - 1
+              hence p + n <= mem + nplus.
+              So, the memory range [p, p+n) lies in the allocated memory range
+              [mem, mem + nplus).  */
+-          small_t *sp = p;
++          sp = p;
+ # if defined __CHERI_PURE_CAPABILITY__
+           sp[-1] = umem;
+           p = (char *) cheri_bounds_set ((char *) p - sizeof (small_t),
