@@ -259,6 +259,7 @@ B-macOS14Xcode15:
   before_script:
   - brew install autoconf automake libtool gengetopt bison help2man texinfo coreutils
   script:
+  - PATH="$HOMEBREW_PREFIX/opt/bison/bin:$PATH"; export PATH
   - time ./bootstrap --skip-po
   - time ./configure --enable-gcc-warnings
   - make syntax-check
