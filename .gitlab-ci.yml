@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 variables:
+  GIT_DEPTH: 100
   GNULIB_URL: https://gitlab.com/libidn/gnulib-mirror.git
 
 workflow:
@@ -264,6 +265,7 @@ B-macOS14Xcode15:
   - time ./configure --enable-gcc-warnings
   - make syntax-check
   - time make -j$(nproc) check -k V=1 VERBOSE=t
+  - make dist
   - git diff --exit-code # nothing should change version controlled files
   - !reference [.repro, script]
 
