@@ -351,18 +351,18 @@ DEFINITIONS IMPLICIT TAGS ::=
 
 BEGIN
 
-OtherStruct := SEQUENCE {
+OtherStruct ::= SEQUENCE {
      x       INTEGER,
      y       CHOICE {
          y1 INTEGER,
-         y2 OCTET STRING },
+         y2 OCTET STRING }
 }
 
 Dss-Sig-Value ::= SEQUENCE {
      r       INTEGER,
      s       INTEGER,
-     other   OtherStruct
-     z       INTEGER OPTIONAL,
+     other   OtherStruct,
+     z       INTEGER OPTIONAL
 }
 
 END
