@@ -26,12 +26,12 @@
 /*   an ASN1 type.                                   */
 /*****************************************************/
 
-#include <int.h>
+#include "int.h"
 #include "parser_aux.h"
-#include <gstr.h>
+#include "gstr.h"
 #include "element.h"
 #include "minmax.h"
-#include <structure.h>
+#include "structure.h"
 
 #define MAX_TAG_LEN 16
 

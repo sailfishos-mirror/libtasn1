@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#include <int.h>
+#include "int.h"
 #ifdef STDC_HEADERS
 # include <stdarg.h>
 #endif
