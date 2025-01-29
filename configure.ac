@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-# Copyright (C) 2002-2024 Free Software Foundation, Inc.
+# Copyright (C) 2002-2025 Free Software Foundation, Inc.
 #
 # This file is part of LIBTASN1.
 #
@@ -36,10 +36,10 @@ AC_SUBST([NUMBER_VERSION], [`printf '0x%02x%02x%02x' $MAJOR_VERSION $MINOR_VERSI
 AC_MSG_NOTICE([$PACKAGE_NAME $PACKAGE_VERSION $PACKAGE_TARNAME $MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION $NUMBER_VERSION $LT_CURRENT:$LT_REVISION:$LT_AGE $DLL_VERSION])
 
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_MACRO_DIRS([m4 src/gl/m4])
 AC_CONFIG_HEADERS(config.h)
 
-AM_INIT_AUTOMAKE([-Wall -Wno-portability])
+AM_INIT_AUTOMAKE([tar-ustar -Wall -Wno-portability])
 AM_SILENT_RULES([yes])
 
 AC_PROG_CC

@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-# Copyright (C) 2002-2024 Free Software Foundation, Inc.
+# Copyright (C) 2002-2025 Free Software Foundation, Inc.
 #
 # This file is part of LIBTASN1.
 #
@@ -38,8 +38,6 @@ endif
 SUBDIRS += fuzz tests
 
 include $(top_srcdir)/aminclude_static.am
-
-ACLOCAL_AMFLAGS = -I m4 -I src/gl/m4
 
 ABIDW_COMMON = --no-show-locs --no-corpus-path
 ABIGNORE_FILE = "$(top_srcdir)/devel/libtasn1.abignore"
@@ -122,16 +120,20 @@ dist-hook: mtime-NEWS-to-git-HEAD
 mtime-NEWS-to-git-HEAD:
 	$(AM_V_GEN)if test -e $(srcdir)/.git \
 			&& command -v git > /dev/null; then \
-		touch -m -d @"$$(git log -1 --format=%ct)" $(srcdir)/NEWS; \
+		touch -m -t "$$(git log -1 --format=%cd --date=format-local:%Y%m%d%H%M.%S)" $(srcdir)/NEWS; \
 	fi
 
 .PHONY: gen-ChangeLog
 gen-ChangeLog:
-	$(AM_V_GEN)if test -d .git; then				\
-		$(top_srcdir)/build-aux/gitlog-to-changelog >		\
-			$(distdir)/cl-t &&				\
-		{ rm -f $(distdir)/ChangeLog &&				\
-		  mv $(distdir)/cl-t $(distdir)/ChangeLog; }		\
+	$(AM_V_GEN)if test -e $(srcdir)/.git; then			\
+	  LC_ALL=en_US.UTF-8 TZ=UTC0					\
+	    $(top_srcdir)/build-aux/gitlog-to-changelog			\
+	      --srcdir=$(srcdir) --					\
+	      v$(PREV_VERSION)~.. > $(distdir)/cl-t &&			\
+	    { printf '\n\nSee the source repo for older entries\n'	\
+	      >> $(distdir)/cl-t &&					\
+	      rm -f $(distdir)/ChangeLog &&				\
+	      mv $(distdir)/cl-t $(distdir)/ChangeLog; }		\
 	fi
 
 .PHONY: abi-check abi-dump-versioned abi-dump-latest

@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2024 Free Software Foundation, Inc.
+# Copyright (C) 2016-2025 Free Software Foundation, Inc.
 #
 # This file is part of LIBTASN1.
 #
@@ -15,18 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-variables:
-  GNULIB_URL: https://gitlab.com/libidn/gnulib-mirror.git
-
 workflow:
   rules:
   - if: $CI_COMMIT_BRANCH
 
 variables:
-  GIT_SUBMODULE_STRATEGY: normal
   BUILD_IMAGES_PROJECT: gnutls/build-images
   FEDORA_BUILD: buildenv-fedora33
   GET_SOURCES_ATTEMPTS: "3"
+  GIT_DEPTH: 100
+  GIT_SUBMODULE_STRATEGY: normal
+  GNULIB_URL: https://gitlab.com/libidn/gnulib-mirror.git
 
 default:
   interruptible: true
@@ -47,17 +46,24 @@ default:
   - mv -v *.tar.* tar/$CI_JOB_NAME_SLUG/
   - (! ls tar/$CI_JOB_NAME_SLUG/*-src.tar.*) || mv -v tar/$CI_JOB_NAME_SLUG/*-src.tar.* tar/$CI_JOB_NAME_SLUG/src/
 
+sast:
+  stage: build
+  variables:
+    SAST_EXCLUDED_PATHS: lib/gl, src/gl
+include:
+- template: Security/SAST.gitlab-ci.yml
+
 # See http://doc.gitlab.com/ce/ci/yaml/ for documentation.
 x86-64:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   stage: build
   script:
   - yum remove -y libtasn1-devel
-  - ./bootstrap
-  - ./configure --disable-doc && make -j$(nproc)
-  - make syntax-check
-  - make -j$(nproc) check
-  - make dist
+  - time ./bootstrap
+  - time ./configure --disable-doc && make -j$(nproc)
+  - time make syntax-check
+  - time make -j$(nproc) check
+  - time make dist
   except:
   - tags
   artifacts:
@@ -81,11 +87,11 @@ B-gcc:
   - apt-get install -y -qq --no-install-recommends bison texinfo help2man valgrind
   script:
   - gcc --version
-  - ./bootstrap
-  - ./configure CC="gcc -std=gnu2x"
-  - make V=1 VERBOSE=t check clean
-  - ./configure CC="gcc -std=c23"
-  - make V=1 all check dist
+  - time ./bootstrap
+  - time ./configure CC="gcc -std=gnu2x"
+  - time make V=1 VERBOSE=t check clean
+  - time ./configure CC="gcc -std=c23"
+  - time make V=1 all check dist
   - git status
   - git diff --exit-code
   - !reference [.repro, script]
@@ -98,11 +104,11 @@ B-clang:
   - apt-get install -y -qq --no-install-recommends git libtool bison texinfo help2man
   script:
   - clang --version
-  - ./bootstrap
-  - ./configure CC="clang -std=gnu2x"
-  - make V=1 VERBOSE=t check clean
-  - ./configure CC="clang -std=c23"
-  - make V=1 VERBOSE=t check dist
+  - time ./bootstrap
+  - time ./configure CC="clang -std=gnu2x"
+  - time make V=1 VERBOSE=t check clean
+  - time ./configure CC="clang -std=c23"
+  - time make V=1 VERBOSE=t check dist
   - git status
   - git diff --exit-code
   - !reference [.repro, script]
@@ -114,13 +120,13 @@ B-Debian10:
   - apt-get update -qq | tail
   - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make git autoconf automake libtool bison texinfo texlive texlive-generic-recommended texlive-extra-utils help2man gtk-doc-tools valgrind | tail
   script:
-  - ./bootstrap
+  - time ./bootstrap
   - mkdir b
   - cd b
-  - ../configure --enable-gcc-warnings
-  - make -j$(nproc)
-  - make -j$(nproc) check
-  - make syntax-check distcheck
+  - time ../configure --enable-gcc-warnings
+  - time make -j$(nproc)
+  - time make -j$(nproc) check
+  - time make syntax-check distcheck
   - git status
   - git diff --exit-code
   - !reference [.repro, script]
@@ -245,6 +251,31 @@ B-Trisquel11:
   image: kpengboy/trisquel:11.0
   extends: .trisquelubuntu
 
+B-Guix:
+  image: registry.gitlab.com/debdistutils/guix/container:latest
+  stage: build
+  before_script:
+  - cp -rL /gnu/store/*profile/etc/* /etc/
+  - echo 'root:x:0:0:root:/:/bin/sh' >> /etc/passwd
+  - groupadd --system guixbuild
+  - for i in $(seq -w 1 10); do useradd -g guixbuild -G guixbuild -d /var/empty -s $(command -v nologin) -c "Guix build user $i" --system guixbuilder$i; done
+  - export HOME=/
+  - env LANG=C.UTF-8 guix-daemon --build-users-group=guixbuild &
+  - guix archive --authorize < /share/guix/ci.guix.gnu.org.pub
+  - guix archive --authorize < /share/guix/bordeaux.guix.gnu.org.pub
+  - guix describe
+  - time guix install --verbosity=0 python help2man bison patch libtool indent perl texinfo pkg-config gtk-doc
+  - GUIX_PROFILE="//.guix-profile"
+  - . "$GUIX_PROFILE/etc/profile"
+  script:
+  - time ./bootstrap
+  - time ./configure --disable-doc --enable-gcc-warnings
+  - time make -j$(nproc) syntax-check
+  - time make -j$(nproc) check V=1 VERBOSE=t
+  - time make V=1 dist
+  - git diff --exit-code # nothing should change version controlled files
+  - !reference [.repro, script]
+
 # https://docs.gitlab.com/ee/ci/runners/hosted_runners/macos.html
 B-macOS14Xcode15:
   allow_failure: true
@@ -262,8 +293,33 @@ B-macOS14Xcode15:
   - PATH="$HOMEBREW_PREFIX/opt/bison/bin:$PATH"; export PATH
   - time ./bootstrap --skip-po
   - time ./configure --enable-gcc-warnings
-  - make syntax-check
+  - time make syntax-check
   - time make -j$(nproc) check -k V=1 VERBOSE=t
+  - time make V=1 dist
+  - git diff --exit-code # nothing should change version controlled files
+  - !reference [.repro, script]
+
+B-macOS15Xcode16:
+  allow_failure: true
+  stage: build
+  image: macos-15-xcode-16
+  tags: [ saas-macos-large-m2pro ]
+  variables:
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_INSTALL_UPGRADE: 1
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+  before_script:
+  - brew install autoconf automake libtool gengetopt bison help2man texinfo coreutils
+  script:
+  - PATH="$HOMEBREW_PREFIX/opt/bison/bin:$PATH"; export PATH
+  - time ./bootstrap --skip-po
+  - mkdir b
+  - cd b
+  - time ../configure --enable-gcc-warnings
+  - time make syntax-check
+  - time make -j$(nproc) check -k V=1 VERBOSE=t
+  - time make dist
   - git diff --exit-code # nothing should change version controlled files
   - !reference [.repro, script]
 
@@ -275,8 +331,8 @@ B-Ubuntu2404-release:
   - tags # do-release-commit-and-tag: not on branch
   before_script:
   - cat /etc/os-release
-  - apt-get update -qq
-  - apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind codespell
+  - time apt-get update -qq
+  - time apt-get install -y -qq make git autoconf automake libtool bison texinfo help2man gtk-doc-tools valgrind codespell
   script:
   - time ./bootstrap --skip-po
   - time ./configure --enable-gcc-warnings
@@ -293,37 +349,35 @@ B-Ubuntu2404-release:
   - git config user.signingkey pipeline@example.org
   - sed -i '4i - WARNING This release was prepared automatically with no testing.' NEWS
   - git commit -m "Warn about automatic release." NEWS
-  - make release-commit RELEASE='17.42.23 stable'
-  - make
-  - make release RELEASE='17.42.23 stable' V=1 VERBOSE=t
+  - time make release-commit RELEASE='17.42.23 stable'
+  - time make
+  - time make release RELEASE='17.42.23 stable' V=1 VERBOSE=t
   - cat -n ~/announce-*-17.42.23
   - git diff --exit-code # nothing should change version controlled files
   - !reference [.repro, script]
 
 000-reproducibility:
   stage: test
-  needs: [ B-AlmaLinux8, B-AlmaLinux9, B-RockyLinux8, B-RockyLinux9, B-Trisquel11, B-Ubuntu2204, B-PureOS10, B-Debian11, B-Devuan5, B-Debian12, B-gcc, B-clang, B-Debian10, B-macOS14Xcode15, B-Ubuntu2404-release ]
+  needs: [ B-AlmaLinux8, B-AlmaLinux9, B-RockyLinux8, B-RockyLinux9, B-Trisquel11, B-Guix, B-Ubuntu2204, B-PureOS10, B-Debian11, B-Devuan5, B-Debian12, B-gcc, B-clang, B-Debian10, B-macOS14Xcode15, B-macOS15Xcode16, B-Ubuntu2404-release ]
   script:
   - cd tar
-  - sha256sum */*.tar.* */src/*.tar.* | sort
+  - sha256sum */*.tar.* */src/*.tar.* | sort | grep    -- -src.tar.
+  - sha256sum */*.tar.* */src/*.tar.* | sort | grep -v -- -src.tar.
   - sha256sum */*.tar.* */src/*.tar.* | sort | uniq -c -w64 | sort -rn
   - sha256sum */*.tar.* */src/*.tar.* | grep    -- -src.tar. | sort | uniq -c -w64 | grep -v '^      1 '
   - sha256sum */*.tar.* */src/*.tar.* | grep -v -- -src.tar. | sort | uniq -c -w64 | grep -v '^      1 '
-  - |
-    : Confirm modern git-archive output reproducibility
+# Confirm modern git-archive tarball reproducibility
   - cmp b-almalinux8/src/*.tar.gz b-almalinux9/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz b-rockylinux8/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz b-rockylinux9/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz b-debian12/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz b-devuan5/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz b-ubuntu2404-release/src/*v4*.tar.gz
-  - |
-    : Confirm old git-archive output reproducibility
+# Confirm old git-archive (export-subst but long git describe) tarball reproducibility
+  - cmp b-trisquel11/src/*.tar.gz b-ubuntu2204/src/*.tar.gz
+# Confirm really old git-archive (no export-subst) tarball reproducibility
   - cmp b-debian11/src/*.tar.gz b-pureos10/src/*.tar.gz
-  - cmp b-debian11/src/*.tar.gz b-trisquel11/src/*.tar.gz
-  - cmp b-debian11/src/*.tar.gz b-ubuntu2204/src/*.tar.gz
-  - |
-    : Confirm non-minimal generated tarball reproducibility
+# Confirm 'make dist' generated tarball reproducibility
   - cmp b-almalinux8/*.tar.gz b-rockylinux8/*.tar.gz
   - cmp b-almalinux9/*.tar.gz b-rockylinux9/*.tar.gz
   - cmp b-pureos10/*.tar.gz b-debian11/*.tar.gz
@@ -334,9 +388,10 @@ valgrind/werror:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - yum remove -y libtasn1-devel
-  - ./bootstrap
-  - CFLAGS="-O2 -g -Werror" ./configure --disable-doc --enable-valgrind-tests && make -j$(nproc)
-  - make -j$(nproc) check
+  - time ./bootstrap
+  - time ./configure --disable-doc --enable-valgrind-tests CFLAGS="-O2 -g -Werror"
+  - time make -j$(nproc)
+  - time make -j$(nproc) check
   except:
   - tags
   artifacts:
@@ -350,9 +405,9 @@ clang:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - yum remove -y libtasn1-devel
-  - ./bootstrap
+  - time ./bootstrap
   - CC=clang ./configure --disable-doc --disable-valgrind-tests && make -j$(nproc)
-  - make check -j$(nproc)
+  - time make check -j$(nproc)
   except:
   - tags
   artifacts:
@@ -366,8 +421,10 @@ asan:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - yum remove -y libtasn1-devel
-  - ./bootstrap
-  - CFLAGS="-fsanitize=address -g -O2" LDFLAGS="-static-libasan" ./configure --disable-doc --disable-valgrind-tests && make -j$(nproc) && make check -j$(nproc)
+  - time ./bootstrap
+  - time ./configure --disable-doc --disable-valgrind-tests CFLAGS="-fsanitize=address -g -O2" LDFLAGS="-static-libasan"
+  - time make -j$(nproc)
+  - time make check -j$(nproc)
   except:
   - tags
   artifacts:
@@ -381,8 +438,10 @@ ubsan:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - yum remove -y libtasn1-devel
-  - ./bootstrap
-  - CFLAGS="-fsanitize=undefined -fno-sanitize-recover -g -O2" ./configure --disable-doc --disable-valgrind-tests && make -j$(nproc) && make check -j$(nproc)
+  - time ./bootstrap
+  - time ./configure --disable-doc --disable-valgrind-tests CFLAGS="-fsanitize=undefined -fno-sanitize-recover -g -O2"
+  - time make -j$(nproc)
+  - time make check -j$(nproc)
   except:
   - tags
   artifacts:
@@ -399,7 +458,7 @@ MinGW32-bootstrap:
   - dnf remove -y mingw32-libtasn1
   - mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
   - echo ':DOSWin:M::MZ::/usr/bin/wine:' > /proc/sys/fs/binfmt_misc/register
-  - ./bootstrap && rm -f tests/suite/mini-eagain2.c && mkdir -p build && cd build &&
+  - time ./bootstrap && rm -f tests/suite/mini-eagain2.c && mkdir -p build && cd build &&
     mingw32-configure --disable-doc --disable-valgrind-tests &&
     mingw32-make -j$(nproc) && mingw32-make -C tests check -j$(nproc)
   except:
@@ -417,8 +476,8 @@ gnutls:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - yum remove -y libtasn1-devel
-  - ./bootstrap
-  - ./configure --disable-doc --prefix=/usr --libdir=/usr/lib64 &&
+  - time ./bootstrap
+  - time ./configure --disable-doc --prefix=/usr --libdir=/usr/lib64 &&
     make -j$(nproc) && make install
   - git clone --depth 1 --branch master https://gitlab.com/gnutls/gnutls.git gnutls-git
   - cd gnutls-git && git submodule update --init && ./bootstrap &&
@@ -439,12 +498,12 @@ gnutls:
 static-analyzers:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
-  - ./bootstrap
-  - scan-build ./configure --disable-doc
-  - make -j$(nproc) syntax-check
-  - make -j$(nproc) -C lib/gl
-  - make -j$(nproc) -C lib ASN1.lo
-  - scan-build --status-bugs -o scan-build-lib make -j$(nproc) -C lib
+  - time ./bootstrap
+  - time scan-build ./configure --disable-doc
+  - time make -j$(nproc) syntax-check
+  - time make -j$(nproc) -C lib/gl
+  - time make -j$(nproc) -C lib ASN1.lo
+  - time scan-build --status-bugs -o scan-build-lib make -j$(nproc) -C lib
   except:
   - tags
   artifacts:
@@ -497,13 +556,13 @@ armcross:
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - mkdir b
   - cd b
-  - ../configure --host=arm-linux-gnueabi --enable-gcc-warnings CFLAGS="-static --static"
-  - make V=1
+  - time ../configure --host=arm-linux-gnueabi --enable-gcc-warnings CFLAGS="-static --static"
+  - time make V=1
   - arm-linux-gnueabi-readelf -h lib/.libs/libtasn1.a
   - arm-linux-gnueabi-readelf -h src/asn1Parser
   - file src/asn1Parser
   - LANG=C.UTF-8 qemu-arm src/asn1Parser -c ../tests/pkix.asn
-  - make check
+  - time make check
 
 Mingw32:
   image: debian:11-slim
@@ -517,8 +576,8 @@ Mingw32:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure --host=i686-w64-mingw32 CC='i686-w64-mingw32-gcc -static-libgcc' --enable-gcc-warnings
-  - make check V=1
+  - time ./configure --host=i686-w64-mingw32 CC='i686-w64-mingw32-gcc -static-libgcc' --enable-gcc-warnings
+  - time make check V=1
 
 Mingw64:
   image: debian:11-slim
@@ -531,8 +590,8 @@ Mingw64:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure  --host=x86_64-w64-mingw32 --enable-gcc-warnings
-  - make check V=1
+  - time ./configure  --host=x86_64-w64-mingw32 --enable-gcc-warnings
+  - time make check V=1
 
 Alpine:
   image: alpine:latest
@@ -545,9 +604,9 @@ Alpine:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure --enable-gcc-warnings
+  - time ./configure --enable-gcc-warnings
   - sed -i 's/UNKNOWN/10.11.12/g' tests/version.c # XXX FIXME alpine bug?
-  - make check V=1
+  - time make check V=1
 
 ArchLinux:
   image: archlinux:latest
@@ -558,8 +617,8 @@ ArchLinux:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure --enable-gcc-warnings
-  - make check V=1
+  - time ./configure --enable-gcc-warnings
+  - time make check V=1
 
 OracleLinux7:
   image: oraclelinux:7
@@ -571,8 +630,8 @@ OracleLinux7:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
   - sed -i -e 's/ --sort=name//' GNUmakefile # C7's tar too old for 'make dist'
-  - ./configure --enable-gcc-warnings
-  - make check V=1 VERBOSE=t
+  - time ./configure --enable-gcc-warnings
+  - time make check V=1 VERBOSE=t
 
 AlmaLinux8-c89:
   image: almalinux:8
@@ -583,8 +642,8 @@ AlmaLinux8-c89:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure --enable-gcc-warnings ac_cv_prog_cc_c11=-std=c89
-  - make check V=1 VERBOSE=t WERROR_CFLAGS='-Dinline= -Werror -Wno-error=unused-function -Wno-error=nested-externs -Wno-error=implicit-function-declaration'
+  - time ./configure --enable-gcc-warnings ac_cv_prog_cc_c11=-std=c89
+  - time make check V=1 VERBOSE=t WERROR_CFLAGS='-Dinline= -Werror -Wno-error=unused-function -Wno-error=nested-externs -Wno-error=implicit-function-declaration'
 
 Debian3:
   image: debian/eol:woody
@@ -637,8 +696,8 @@ Debian8:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure --enable-gcc-warnings --disable-doc
-  - make check V=1 VERBOSE=t
+  - time ./configure --enable-gcc-warnings --disable-doc
+  - time make check V=1 VERBOSE=t
 
 Debian9-distcheck:
   image: debian:9-slim
@@ -651,8 +710,8 @@ Debian9-distcheck:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure --enable-gcc-warnings
-  - make distcheck V=1
+  - time ./configure --enable-gcc-warnings
+  - time make distcheck V=1
   - !reference [.repro, script]
 
 Debian11-distcheck:
@@ -665,8 +724,8 @@ Debian11-distcheck:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure --enable-gcc-warnings
-  - make distcheck V=1
+  - time ./configure --enable-gcc-warnings
+  - time make distcheck V=1
   - !reference [.repro, script]
 
 macOS13Xcode14:
@@ -680,9 +739,23 @@ macOS13Xcode14:
   - cd $(gzip -cd tar/b-trisquel11/libtasn1-*.tar.gz | tar tf - | head -n1)
   - mkdir b
   - cd b
-  - ../configure --enable-gcc-warnings
-  - make -j$(nproc) syntax-check
-  - make -j$(nproc) V=1 check -k VERBOSE=t
+  - time ../configure --enable-gcc-warnings
+  - time make -j$(nproc) syntax-check
+  - time make -j$(nproc) V=1 check -k VERBOSE=t
+
+OpenBSD:
+  tags: [ "openbsd" ]
+  allow_failure: true
+  needs: [B-Trisquel11]
+  stage: test
+  before_script:
+  - uname -a
+  - sysctl hw
+  script:
+  - gzip -cd tar/b-trisquel11/libtasn1-*.tar.gz | tar xf -
+  - cd $(gzip -cd tar/b-trisquel11/libtasn1-*.tar.gz | tar tf - | head -n1)
+  - time ./configure --enable-gcc-warnings
+  - time make check V=1 VERBOSE=t
 
 Ubuntu-latest-distcheck:
   image: ubuntu:latest
@@ -694,8 +767,8 @@ Ubuntu-latest-distcheck:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure --enable-gcc-warnings
-  - make distcheck V=1
+  - time ./configure --enable-gcc-warnings
+  - time make distcheck V=1
   - !reference [.repro, script]
 
 Ubuntu-rolling-distcheck:
@@ -708,8 +781,8 @@ Ubuntu-rolling-distcheck:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure --enable-gcc-warnings
-  - make distcheck V=1
+  - time ./configure --enable-gcc-warnings
+  - time make distcheck V=1
   - !reference [.repro, script]
 
 tcc-lld:
@@ -722,8 +795,8 @@ tcc-lld:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure CC=tcc LD=lld --disable-shared
-  - make check V=1 VERBOSE=t
+  - time ./configure CC=tcc LD=lld --disable-shared
+  - time make check V=1 VERBOSE=t
 
 pcc:
   image: debian:11-slim
@@ -735,34 +808,34 @@ pcc:
   script:
   - tar xfz tar/b-trisquel11/libtasn1-*.tar.gz
   - cd $(tar tfz tar/b-trisquel11/libtasn1-*.tar.gz | head -n1)
-  - ./configure CC=pcc
-  - make V=1 VERBOSE=t -C lib
-  - make V=1 VERBOSE=t -C fuzz check
+  - time ./configure CC=pcc
+  - time make V=1 VERBOSE=t -C lib
+  - time make V=1 VERBOSE=t -C fuzz check
   - sed -i 's/exit 1/exit 77/' tests/parser.sh
   - sed -i 's/diff/diff -u/' tests/parser.sh
   - ln -s /usr/bin/asn1Parser src/
   - ln -s /usr/bin/asn1Decoding src/
   - ln -s /usr/bin/asn1Coding src/
-  - make V=1 VERBOSE=t -C tests check
+  - time make V=1 VERBOSE=t -C tests check
 
 .pages:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - dnf install -y dblatex
-  - ./bootstrap
+  - time ./bootstrap
   - CFLAGS="-g -Og" dash ./configure --enable-code-coverage --enable-gtk-doc --enable-gtk-doc-pdf --disable-gcc-warnings
   - mkdir -p public
-  - make -j$(nproc)
-  - make -j$(nproc) check
-  - make local-code-coverage-output || true
-  - make -C doc libtasn1.html libtasn1.pdf
+  - time make -j$(nproc)
+  - time make -j$(nproc) check
+  - time make local-code-coverage-output || true
+  - time make -C doc libtasn1.html libtasn1.pdf
   - mv doc/libtasn1.pdf doc/libtasn1.html public/
   - cp -ar GNU*-coverage/ public/coverage
   - cp public/libtasn1.html public/index.html
   - rm -rf public/reference
   - mv doc/reference/html public/reference
   - mv doc/reference/libtasn1.pdf public/reference/
-  - make web-manual
+  - time make web-manual
   - rm -rf public/manual
   - mv doc/manual public/manual
   artifacts:

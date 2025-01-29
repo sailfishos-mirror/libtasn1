@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2024 Free Software Foundation, Inc.
+# Copyright (C) 2006-2025 Free Software Foundation, Inc.
 # Author: Simon Josefsson
 #
 # This file is part of LIBTASN1.
@@ -20,7 +20,8 @@ manual_title = Library for Abstract Syntax Notation One (ASN.1)
 
 old_NEWS_hash = 4d907e1219cc87297a3044a1d2b9bf3f
 
-bootstrap-tools = gnulib,autoconf,automake,libtoolize,make,makeinfo,bison,help2man,gtkdocize,tar,gzip
+guix = $(shell command -v guix > /dev/null && echo ,guix)
+bootstrap-tools = gnulib,autoconf,automake,libtoolize,make,makeinfo,bison,help2man,gtkdocize,tar,gzip$(guix)
 
 local-checks-to-skip = sc_prohibit_strcmp sc_prohibit_have_config_h	\
 	sc_require_config_h sc_require_config_h_first			\
@@ -47,6 +48,8 @@ exclude_file_name_regexp--sc_makefile_DISTCHECK_CONFIGURE_FLAGS = ^Makefile.am$$
 exclude_file_name_regexp--sc_unportable_grep_q = ^fuzz/(get_all_corpora|get_ossfuzz_corpora|run-clang.sh)$$
 
 TAR_OPTIONS += --mode=go+u,go-w --mtime=$(abs_top_srcdir)/NEWS
+
+announce_gen_args = --cksum-checksums
 
 sc_prohibit_eol_brackets:
 	@prohibit='.+\) *{$$' \
