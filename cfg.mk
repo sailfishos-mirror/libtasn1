@@ -20,7 +20,8 @@ manual_title = Library for Abstract Syntax Notation One (ASN.1)
 
 old_NEWS_hash = 4d907e1219cc87297a3044a1d2b9bf3f
 
-bootstrap-tools = gnulib,autoconf,automake,libtoolize,make,makeinfo,bison,help2man,gtkdocize,tar,gzip
+guix = $(shell command -v guix > /dev/null && echo ,guix)
+bootstrap-tools = gnulib,autoconf,automake,libtoolize,make,makeinfo,bison,help2man,gtkdocize,tar,gzip$(guix)
 
 local-checks-to-skip = sc_prohibit_strcmp sc_prohibit_have_config_h	\
 	sc_require_config_h sc_require_config_h_first			\
