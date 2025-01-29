@@ -48,6 +48,8 @@ exclude_file_name_regexp--sc_unportable_grep_q = ^fuzz/(get_all_corpora|get_ossf
 
 TAR_OPTIONS += --mode=go+u,go-w --mtime=$(abs_top_srcdir)/NEWS
 
+announce_gen_args = --cksum-checksums
+
 sc_prohibit_eol_brackets:
 	@prohibit='.+\) *{$$' \
 	halt='please block bracket { use in a separate line' \
