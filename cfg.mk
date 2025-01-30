@@ -25,7 +25,7 @@ bootstrap-tools = gnulib,autoconf,automake,libtoolize,make,makeinfo,bison,help2m
 
 local-checks-to-skip = sc_prohibit_strcmp \
 	sc_immutable_NEWS sc_prohibit_magic_number_exit			\
-	sc_bindtextdomain sc_GPL_version sc_prohibit_always_true_header_tests \
+	sc_bindtextdomain sc_GPL_version \
 	sc_prohibit_gnu_make_extensions
 
 VC_LIST_ALWAYS_EXCLUDE_REGEX = ^(maint.mk|gtk-doc.make|build-aux/.*|lib/gl/.*|lib/ASN1\.c|m4/pkg.m4|doc/gdoc|windows/.*|doc/fdl-1.3.texi|fuzz/.*_fuzzer.(in|repro)/.*)$$
