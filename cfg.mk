@@ -23,10 +23,9 @@ old_NEWS_hash = 4d907e1219cc87297a3044a1d2b9bf3f
 guix = $(shell command -v guix > /dev/null && echo ,guix)
 bootstrap-tools = gnulib,autoconf,automake,libtoolize,make,makeinfo,bison,help2man,gtkdocize,tar,gzip$(guix)
 
-local-checks-to-skip = sc_prohibit_strcmp sc_prohibit_have_config_h	\
-	sc_require_config_h sc_require_config_h_first			\
-	sc_immutable_NEWS sc_prohibit_magic_number_exit			\
-	sc_bindtextdomain sc_GPL_version sc_prohibit_always_true_header_tests \
+
+local-checks-to-skip = sc_prohibit_strcmp sc_immutable_NEWS	\
+	sc_bindtextdomain sc_GPL_version			\
 	sc_prohibit_gnu_make_extensions
 
 VC_LIST_ALWAYS_EXCLUDE_REGEX = ^(maint.mk|gtk-doc.make|build-aux/.*|lib/gl/.*|lib/ASN1\.c|m4/pkg.m4|doc/gdoc|windows/.*|doc/fdl-1.3.texi|fuzz/.*_fuzzer.(in|repro)/.*)$$
@@ -46,6 +45,10 @@ exclude_file_name_regexp--sc_useless_cpp_parens = ^lib/includes/libtasn1.h$$
 exclude_file_name_regexp--sc_prohibit_eol_brackets = ^(bootstrap-funclib.sh|tests/.*|fuzz/.*|bootstrap)$$
 exclude_file_name_regexp--sc_makefile_DISTCHECK_CONFIGURE_FLAGS = ^Makefile.am$$
 exclude_file_name_regexp--sc_unportable_grep_q = ^fuzz/(get_all_corpora|get_ossfuzz_corpora|run-clang.sh)$$
+exclude_file_name_regexp--sc_prohibit_have_config_h = ^tests/Test_tree_asn1_tab.c|tests/pkix.asn.out$$
+exclude_file_name_regexp--sc_require_config_h = ^examples/CertificateExample.c|examples/CrlExample.c|tests/Test_tree_asn1_tab.c$$
+exclude_file_name_regexp--sc_require_config_h_first = $(exclude_file_name_regexp--sc_require_config_h)
+exclude_file_name_regexp--sc_prohibit_magic_number_exit = ^tests/.*$$
 
 TAR_OPTIONS += --mode=go+u,go-w --mtime=$(abs_top_srcdir)/NEWS
 

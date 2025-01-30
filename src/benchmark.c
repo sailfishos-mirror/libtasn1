@@ -96,20 +96,20 @@ start_benchmark (struct benchmark_st *st)
   if (st->wtimer == NULL)
     {
       fprintf (stderr, "error: CreateWaitableTimer %u\n", GetLastError ());
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   st->wthread = CreateThread (NULL, 0, alarm_handler, &st->wtimer, 0, NULL);
   if (st->wthread == NULL)
     {
       fprintf (stderr, "error: CreateThread %u\n", GetLastError ());
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   st->alarm_timeout.QuadPart = (5) * 10000000;
   if (SetWaitableTimer (st->wtimer, &st->alarm_timeout, 0, NULL, NULL, FALSE)
       == 0)
     {
       fprintf (stderr, "error: SetWaitableTimer %u\n", GetLastError ());
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 #else
   alarm (5);

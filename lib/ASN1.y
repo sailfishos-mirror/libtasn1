@@ -19,6 +19,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+#include <config.h>
+
 /*****************************************************/
 /* File: x509_ASN.y                                  */
 /* Description: input file for 'bison' program.      */
@@ -62,7 +64,7 @@ static int _asn1_yylex(void);
     { \
       fprintf(stderr, "%s:%u: Oversize value\n", \
                file_name, line_number); \
-      exit(1); \
+      exit(EXIT_FAILURE);		\
     } \
 }
 #endif

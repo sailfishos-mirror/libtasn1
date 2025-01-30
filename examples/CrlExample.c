@@ -519,7 +519,7 @@ main (int argc, char *argv[])
     {
       asn1_perror (result);
       printf ("%s\n", errorDescription);
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   /* Use the following 3 lines to visit the PKIX1Implicit structures */

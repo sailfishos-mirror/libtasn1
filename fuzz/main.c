@@ -22,7 +22,7 @@
  * This file is part of libtasn1.
  */
 
-#include "../config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <unistd.h>

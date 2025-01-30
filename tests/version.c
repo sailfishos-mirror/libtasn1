@@ -18,6 +18,8 @@
  *
  */
 
+#include <config.h>
+
 #include <stdio.h>		/* printf */
 #include <stdlib.h>		/* EXIT_SUCCESS */
 #include <string.h>		/* strcmp */

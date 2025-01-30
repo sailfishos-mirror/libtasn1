@@ -18,6 +18,8 @@
  *
  */
 
+#include <config.h>
+
 /******************************************************/
 /* File: Test_encoding.c                              */
 /* Description: Test writing values and DER encoding. */

@@ -18,6 +18,8 @@
  *
  */
 
+#include <config.h>
+
 #include "libtasn1.h"
 
 int

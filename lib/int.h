@@ -21,18 +21,11 @@
 #ifndef INT_H
 # define INT_H
 
-# ifdef HAVE_CONFIG_H
-#  include <config.h>
-# endif
-
 # include <string.h>
 # include <stdlib.h>
 # include <stdio.h>
 # include <stdint.h>
-
-# ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-# endif
+# include <sys/types.h>
 
 # include <libtasn1.h>
 
