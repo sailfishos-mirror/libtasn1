@@ -652,7 +652,7 @@ main (int argc, char *argv[])
     {
       asn1_perror (result);
       printf ("%s", errorDescription);
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
 

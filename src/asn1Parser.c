@@ -116,7 +116,7 @@ main (int argc, char *argv[])
 		       "Fabio Fiorina", NULL);
 	  free (outputFileName);
 	  free (vectorName);
-	  exit (0);
+	  exit (EXIT_SUCCESS);
 	  break;
 	case 'c':		/* CHECK SYNTAX */
 	  checkSyntaxOnly = 1;
@@ -127,7 +127,7 @@ main (int argc, char *argv[])
 	  if (outputFileName == NULL)
 	    {
 	      fprintf (stderr, "Memory error\n");
-	      exit (1);
+	      exit (EXIT_FAILURE);
 	    }
 	  break;
 	case 'n':		/* VECTOR NAME */
@@ -136,7 +136,7 @@ main (int argc, char *argv[])
 	  if (vectorName == NULL)
 	    {
 	      fprintf (stderr, "Memory error\n");
-	      exit (1);
+	      exit (EXIT_FAILURE);
 	    }
 	  break;
 	case '?':		/* UNKNOWN OPTION */
@@ -167,7 +167,7 @@ main (int argc, char *argv[])
       if (inputFileName == NULL)
 	{
 	  fprintf (stderr, "Memory error\n");
-	  exit (1);
+	  exit (EXIT_FAILURE);
 	}
       strcpy (inputFileName, argv[optind]);
     }
@@ -206,6 +206,7 @@ main (int argc, char *argv[])
   free (vectorName);
 
   if (parse_result != ASN1_SUCCESS)
-    exit (1);
-  exit (0);
+    exit (EXIT_FAILURE);
+
+  return 0;
 }

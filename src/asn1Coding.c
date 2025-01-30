@@ -115,7 +115,7 @@ createFileName (char *inputFileName, char **outputFileName)
   if (*outputFileName == NULL)
     {
       fprintf (stderr, "Memory error\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   memcpy (*outputFileName, inputFileName, dot_p - inputFileName);
@@ -176,7 +176,7 @@ main (int argc, char *argv[])
 	  version_etc (stdout, program_name, PACKAGE, VERSION,
 		       "Fabio Fiorina", NULL);
 	  free (outputFileName);
-	  exit (0);
+	  exit (EXIT_SUCCESS);
 	  break;
 	case 'c':		/* CHECK SYNTAX */
 	  checkSyntaxOnly = 1;
@@ -187,7 +187,7 @@ main (int argc, char *argv[])
 	  if (outputFileName == NULL)
 	    {
 	      fprintf (stderr, "Memory error\n");
-	      exit (1);
+	      exit (EXIT_FAILURE);
 	    }
 	  break;
 	case '?':		/* UNKNOWN OPTION */
@@ -215,14 +215,14 @@ main (int argc, char *argv[])
   if (inputFileAsnName == NULL)
     {
       fprintf (stderr, "Memory error\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   inputFileAssignmentName = strdup (argv[optind + 1]);
   if (inputFileAssignmentName == NULL)
     {
       fprintf (stderr, "Memory error\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   asn1_result =
@@ -249,7 +249,7 @@ main (int argc, char *argv[])
     {
       free (inputFileAsnName);
       free (inputFileAssignmentName);
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
 
@@ -261,7 +261,7 @@ main (int argc, char *argv[])
 	       inputFileAssignmentName);
       free (inputFileAsnName);
       free (inputFileAssignmentName);
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
 
@@ -295,13 +295,13 @@ main (int argc, char *argv[])
 	  free (inputFileAssignmentName);
 
 	  fclose (inputFile);
-	  exit (1);
+	  exit (EXIT_FAILURE);
 	}
     }
   if (last_ra != ASSIGNMENT_EOF)
     {
       fprintf (stderr, "asn1Coding: error reading assignment file\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   fclose (inputFile);
 
@@ -317,7 +317,7 @@ main (int argc, char *argv[])
       if (der == NULL)
 	{
 	  fprintf (stderr, "Memory error\n");
-	  exit (1);
+	  exit (EXIT_FAILURE);
 	}
       asn1_result = asn1_der_coding (structure, "", der, &der_len,
 				     errorDescription);
@@ -335,7 +335,7 @@ main (int argc, char *argv[])
       free (inputFileAsnName);
       free (inputFileAssignmentName);
 
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   /* Print the 'Certificate1' DER encoding */
@@ -365,7 +365,7 @@ main (int argc, char *argv[])
 	  free (inputFileAsnName);
 	  free (inputFileAssignmentName);
 	  free (outputFileName);
-	  exit (1);
+	  exit (EXIT_FAILURE);
 	}
 
       for (k = 0; k < der_len; k++)
@@ -380,5 +380,5 @@ main (int argc, char *argv[])
   free (inputFileAssignmentName);
   free (outputFileName);
 
-  exit (0);
+  return 0;
 }

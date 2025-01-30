@@ -128,7 +128,7 @@ main (int argc, char *argv[])
 	case 'v':		/* VERSION */
 	  version_etc (stdout, program_name, PACKAGE, VERSION,
 		       "Fabio Fiorina", NULL);
-	  exit (0);
+	  exit (EXIT_SUCCESS);
 	  break;
 	case '?':		/* UNKNOWN OPTION */
 	  fprintf (stderr,
@@ -160,7 +160,7 @@ main (int argc, char *argv[])
       free (inputFileAsnName);
       free (inputFileDerName);
       free (typeName);
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   asn1_result =
@@ -188,7 +188,7 @@ main (int argc, char *argv[])
       free (inputFileAsnName);
       free (inputFileDerName);
       free (typeName);
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
 
@@ -213,7 +213,7 @@ main (int argc, char *argv[])
       free (inputFileAsnName);
       free (inputFileDerName);
       free (typeName);
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
  /*****************************************/
@@ -240,7 +240,7 @@ main (int argc, char *argv[])
       free (inputFileDerName);
       free (typeName);
       free (der);
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   asn1_delete_structure (&definitions);
@@ -252,9 +252,9 @@ main (int argc, char *argv[])
   free (typeName);
 
   if (asn1_result != ASN1_SUCCESS)
-    exit (1);
+    exit (EXIT_FAILURE);
 
-  exit (0);
+  return 0;
 }
 
 static int

@@ -64,7 +64,7 @@ static int _asn1_yylex(void);
     { \
       fprintf(stderr, "%s:%u: Oversize value\n", \
                file_name, line_number); \
-      exit(1); \
+      exit(EXIT_FAILURE);		\
     } \
 }
 #endif
