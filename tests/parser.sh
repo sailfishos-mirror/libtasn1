@@ -44,11 +44,13 @@ fi
 LC_ALL=C tr -d "$cr" < $TMPFILE > x$TMPFILE
 mv x$TMPFILE $TMPFILE
 
-diff ${TMPFILE} ${srcdir}/pkix.asn.out
+cmp ${TMPFILE} ${srcdir}/pkix.asn.out || \
+    diff ${TMPFILE} ${srcdir}/pkix.asn.out
 
 if test $? != 0;then
-	echo "Generated C file differs!"
-	exit 1
+    echo "Generated C file differs!"
+    cat ${TMPFILE}
+    exit 1
 fi
 
 rm -f ${TMPFILE}
