@@ -18,6 +18,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+#include <config.h>
+
 #include <int.h>
 #include "gstr.h"
 

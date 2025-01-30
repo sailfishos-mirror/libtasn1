@@ -18,6 +18,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+#include <config.h>
 
 /*****************************************************/
 /* File: structure.c                                 */

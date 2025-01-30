@@ -18,6 +18,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+#include <config.h>
+
 /*****************************************************/
 /* File: element.c                                   */
 /* Description: Functions with the read and write    */

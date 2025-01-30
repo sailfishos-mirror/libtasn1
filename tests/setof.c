@@ -18,6 +18,8 @@
  *
  */
 
+#include <config.h>
+
 /****************************************************************/
 /* File: Test_setof.c                                           */
 /* Description: Test writing of SET OF values and DER encoding. */

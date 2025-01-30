@@ -19,6 +19,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+#include <config.h>
+
 /*****************************************************/
 /* File: x509_ASN.y                                  */
 /* Description: input file for 'bison' program.      */

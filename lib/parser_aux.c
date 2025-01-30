@@ -18,6 +18,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 
+#include <config.h>
+
 #include <limits.h>		/* WORD_BIT */
 
 #include "int.h"

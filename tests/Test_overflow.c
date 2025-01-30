@@ -18,6 +18,8 @@
  *
  */
 
+#include <config.h>
+
 /* Written by Simon Josefsson */
 
 #include <stdio.h>
