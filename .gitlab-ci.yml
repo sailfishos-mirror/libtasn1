@@ -1028,12 +1028,12 @@ Windows-MSYS:
   - C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -Syuu'
   - |
     C:\msys64\usr\bin\bash -lcx '
-    pacman --noconfirm -Syu make gcc
+    pacman --noconfirm -Syu make gcc diffutils
     tar xfz out/b-trisquel11/*-*.tar.gz
     cd `tar tfz out/b-trisquel11/*-*.tar.gz | head -n1`
     ./configure --enable-gcc-warnings
     make -j$(nproc) V=1 -k check VERBOSE=t'
-  - C:\msys64\usr\bin\bash -lc 'grep ^PASS tests/version.log'
+  - C:\msys64\usr\bin\bash -lc 'grep ^PASS *-*/tests/version.log'
 
 .pages:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
