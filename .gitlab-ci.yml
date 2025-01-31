@@ -152,7 +152,7 @@ B-Fedora40:
 # https://releases.llvm.org/13.0.0/tools/clang/docs/UndefinedBehaviorSanitizer.html
 # https://lists.gnu.org/archive/html/bug-gnulib/2022-03/msg00016.html
 B-Fedora41-ASAN/UBSan:
-  allow_failure: true # until someone debug these
+  when: manual # until someone debug failures
   stage: build
   image: fedora:41
   before_script:
@@ -261,6 +261,8 @@ B-Ubuntu2204:
   extends: .trisquelubuntu
 
 B-Trisquel11:
+  rules:
+  - when: always # this job is used by merge request jobs tagged with 'needs' on this job
   image: kpengboy/trisquel:11.0
   extends: .trisquelubuntu
 
@@ -291,7 +293,9 @@ B-Guix:
 
 # https://docs.gitlab.com/ee/ci/runners/hosted_runners/macos.html
 B-macOS14Xcode15:
-  allow_failure: true
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   stage: build
   image: macos-14-xcode-15
   tags: [ saas-macos-medium-m1 ]
@@ -312,7 +316,9 @@ B-macOS14Xcode15:
   - !reference [.save-artifacts, script]
 
 B-macOS15Xcode16:
-  allow_failure: true
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   stage: build
   image: macos-15-xcode-16
   tags: [ saas-macos-large-m2pro ]
@@ -337,7 +343,7 @@ B-macOS15Xcode16:
 0-compare:
   image: alpine:latest
   stage: repro
-  needs: [ B-AlmaLinux8, B-AlmaLinux9, B-RockyLinux8, B-RockyLinux9, B-Trisquel11, B-Guix, B-Ubuntu2204, B-PureOS10, B-Debian11, B-Devuan5, B-Debian12, B-gcc, B-clang, B-Debian10, B-macOS14Xcode15, B-macOS15Xcode16, R-Guix, R-Debian12, R-Ubuntu2404, S-Trisquel10, S-Ubuntu2004 ]
+  needs: [ B-AlmaLinux8, B-AlmaLinux9, B-RockyLinux8, B-RockyLinux9, B-Trisquel11, B-Guix, B-Ubuntu2204, B-PureOS10, B-Debian11, B-Devuan5, B-Debian12, B-gcc, B-clang, B-Debian10, R-Guix, R-Debian12, R-Ubuntu2404, S-Trisquel10, S-Ubuntu2004 ]
   script:
   - cd out
   - sha256sum */*.tar.* */*/*.tar.* | sort | grep    -- -src.tar.
@@ -554,6 +560,7 @@ S-Ubuntu2004:
   - mv -v *.tar.* ../out/$CI_JOB_NAME_SLUG/
 
 valgrind/werror:
+  stage: build
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - yum remove -y libtasn1-devel
@@ -571,6 +578,7 @@ valgrind/werror:
       - ./tests/*.log
 
 clang:
+  stage: build
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - yum remove -y libtasn1-devel
@@ -587,6 +595,7 @@ clang:
       - ./tests/*.log
 
 asan:
+  stage: build
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - yum remove -y libtasn1-devel
@@ -604,6 +613,7 @@ asan:
       - ./tests/*.log
 
 ubsan:
+  stage: build
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - yum remove -y libtasn1-devel
@@ -621,6 +631,7 @@ ubsan:
       - ./tests/*.log
 
 MinGW32-bootstrap:
+  stage: build
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - dnf install -y wine.i686 mingw32-gcc util-linux
@@ -665,6 +676,7 @@ gnutls:
       - gnutls-git/tests/suite/*/*.log
 
 static-analyzers:
+  stage: build
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
   script:
   - time ./bootstrap
@@ -684,8 +696,9 @@ static-analyzers:
 # https://www.synopsys.com/blogs/software-security/integrating-coverity-scan-with-gitlab-ci/
 Coverity:
   rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    when: never
   - if: $CI_COMMIT_REF_PROTECTED == "true"
-  - when: manual
   image: debian:12-slim
   stage: build
   allow_failure: true
@@ -869,11 +882,8 @@ Debian8:
   - time make -j$(nproc) check V=1 VERBOSE=t
 
 Fedora39-arm64:
-  rules:
-  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  - when: manual
   image: fedora:39
-  tags: [ saas-linux-medium-arm64 ]
+  tags: [ saas-linux-small-arm64 ]
   stage: test
   needs: [B-Trisquel11]
   before_script:
@@ -885,7 +895,9 @@ Fedora39-arm64:
   - time make -j$(nproc) check V=1 VERBOSE=t
 
 macOS13Xcode14:
-  allow_failure: true
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   image: macos-13-xcode-14
   tags: [ saas-macos-medium-m1 ]
   stage: test
@@ -900,8 +912,10 @@ macOS13Xcode14:
   - time make -j$(nproc) V=1 check -k VERBOSE=t
 
 OpenBSD:
-  tags: [ "openbsd" ]
-  allow_failure: true
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  tags: [openbsd]
   needs: [B-Trisquel11]
   stage: test
   before_script:
@@ -1006,8 +1020,8 @@ pcc:
 # https://docs.gitlab.com/ee/ci/runners/saas/windows_saas_runner.html
 Windows-MSYS:
   rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  - when: manual
   tags: [ saas-windows-medium-amd64 ]
   stage: test
   needs: [B-Trisquel11]
@@ -1022,12 +1036,12 @@ Windows-MSYS:
   - C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -Syuu'
   - |
     C:\msys64\usr\bin\bash -lcx '
-    pacman --noconfirm -Syu make gcc
+    pacman --noconfirm -Syu make gcc diffutils
     tar xfz out/b-trisquel11/*-*.tar.gz
     cd `tar tfz out/b-trisquel11/*-*.tar.gz | head -n1`
     ./configure --enable-gcc-warnings
     make -j$(nproc) V=1 -k check VERBOSE=t'
-  - C:\msys64\usr\bin\bash -lc 'grep ^PASS tests/version.log'
+  - C:\msys64\usr\bin\bash -lc 'grep ^PASS *-*/tests/version.log'
 
 .pages:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
