@@ -684,6 +684,8 @@ static-analyzers:
 # https://www.synopsys.com/blogs/software-security/integrating-coverity-scan-with-gitlab-ci/
 Coverity:
   rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    when: never
   - if: $CI_COMMIT_REF_PROTECTED == "true"
   - when: manual
   image: debian:12-slim
@@ -870,6 +872,8 @@ Debian8:
 
 Fedora39-arm64:
   rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    when: never
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   - when: manual
   image: fedora:39
@@ -1006,6 +1010,8 @@ pcc:
 # https://docs.gitlab.com/ee/ci/runners/saas/windows_saas_runner.html
 Windows-MSYS:
   rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    when: never
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   - when: manual
   tags: [ saas-windows-medium-amd64 ]
