@@ -54,7 +54,7 @@ struct asn1_node_st
   /* private fields: */
   unsigned char small_value[ASN1_SMALL_VALUE_SIZE];	/* For small values */
   asn1_node parent;		/* Pointer to the parent node */
-  struct asn1_node_array_st numbered_children; /* Array of unnamed child nodes for caching */
+  struct asn1_node_array_st numbered_children;	/* Array of unnamed child nodes for caching */
 
   /* values used during decoding/coding */
   int tmp_ival;
