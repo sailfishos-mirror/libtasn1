@@ -152,7 +152,7 @@ B-Fedora40:
 # https://releases.llvm.org/13.0.0/tools/clang/docs/UndefinedBehaviorSanitizer.html
 # https://lists.gnu.org/archive/html/bug-gnulib/2022-03/msg00016.html
 B-Fedora41-ASAN/UBSan:
-  allow_failure: true # until someone debug these
+  when: manual # until someone debug failures
   stage: build
   image: fedora:41
   before_script:
