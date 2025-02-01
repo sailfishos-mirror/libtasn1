@@ -528,9 +528,9 @@ S-Trisquel10:
   - src/asn1Coding --version | head -1 | grep -v UNKNOWN
   - time make -j$(nproc) dist AM_DISTCHECK_DVI_TARGET=
   - sha256sum *.tar.*
-  - mkdir -pv ../../libtasn1/out/$CI_JOB_NAME_SLUG/src ../../libtasn1/out/$CI_JOB_NAME_SLUG/log
-  - find config.h *.log tests/*.log -exec mv -v {} ../../libtasn1/out/$CI_JOB_NAME_SLUG/log \;
-  - mv -v *.tar.* ../../libtasn1/out/$CI_JOB_NAME_SLUG/
+  - mkdir -pv $CI_PROJECT_DIR/out/$CI_JOB_NAME_SLUG/{src,log}
+  - find config.h *.log tests/*.log -exec mv -v {} $CI_PROJECT_DIR/out/$CI_JOB_NAME_SLUG/log \;
+  - mv -v *.tar.* $CI_PROJECT_DIR/out/$CI_JOB_NAME_SLUG/
 
 S-Ubuntu2004:
   tags: [ saas-linux-medium-amd64 ]
