@@ -103,7 +103,7 @@ main (int argc, char *argv[])
     {
 
       option_result =
-	getopt_long (argc, argv, "hbdsvtc", long_options, &option_index);
+	getopt_long (argc, argv, "hbdsvt", long_options, &option_index);
 
       if (option_result == -1)
 	break;
@@ -193,7 +193,7 @@ main (int argc, char *argv[])
 
 
   {
-    size_t tmplen;
+    size_t tmplen = 0;
     der = (unsigned char *) read_file (inputFileDerName, RF_BINARY, &tmplen);
     der_len = tmplen;
   }
@@ -201,8 +201,10 @@ main (int argc, char *argv[])
   /* read_binary_file() returns a buffer with more data than required,
    * with this reallocation we ensure that memory accesses outside the
    * boundaries are detected */
-  if (der != NULL && debug != 0)
+  if (der != NULL && der_len > 0 && debug != 0)
+  {
     der = realloc (der, der_len);
+  }
 
   if (der == NULL)
     {
