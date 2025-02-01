@@ -185,15 +185,15 @@ fi
 
 # Test valid case where output file is not writable
 touch not_writable.tmp
-chmod 444 not_writable.tmp
+/usr/bin/chmod 444 not_writable.tmp
 $VALGRIND "$ASN1CODING" $TMPFILE $TMPASSIGNFILE -o not_writable.tmp
 if test $? != 1;then
-	chmod 644 not_writable.tmp
+	/usr/bin/chmod 644 not_writable.tmp
 	rm -f not_writable.tmp
 	echo "Encoding failed (5)"
 	exit 1
 fi
-chmod 644 not_writable.tmp
+/usr/bin/chmod 644 not_writable.tmp
 rm -f not_writable.tmp
 
 # Test invalid OID value case (first digit of OID max is 2, we give 3)
