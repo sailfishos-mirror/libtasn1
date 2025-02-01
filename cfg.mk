@@ -23,7 +23,6 @@ old_NEWS_hash = 4d907e1219cc87297a3044a1d2b9bf3f
 guix = $(shell command -v guix > /dev/null && echo ,guix)
 bootstrap-tools = gnulib,autoconf,automake,libtoolize,make,makeinfo,bison,help2man,gtkdocize,tar,gzip$(guix)
 
-
 local-checks-to-skip = sc_prohibit_strcmp sc_immutable_NEWS	\
 	sc_bindtextdomain sc_GPL_version			\
 	sc_prohibit_gnu_make_extensions
@@ -53,6 +52,10 @@ exclude_file_name_regexp--sc_prohibit_magic_number_exit = ^tests/.*$$
 TAR_OPTIONS += --mode=go+u,go-w --mtime=$(abs_top_srcdir)/NEWS
 
 announce_gen_args = --cksum-checksums
+DIST_ARCHIVES += $(shell \
+	if test -e $(srcdir)/.git && command -v git > /dev/null; then \
+		echo $(PACKAGE)-v$(VERSION)-src.tar.gz; \
+	fi)
 
 sc_prohibit_eol_brackets:
 	@prohibit='.+\) *{$$' \

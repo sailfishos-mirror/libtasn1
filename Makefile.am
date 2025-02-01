@@ -111,8 +111,8 @@ srcdist:
 	$(AM_V_GEN)if test -e $(srcdir)/.git \
 			&& command -v git > /dev/null; then \
 	 cd $(srcdir) && \
-	   git archive --prefix=$(PACKAGE)-$$(git describe)/ \
-	       -o $(abs_builddir)/$(PACKAGE)-$$(git describe)-src.tar.gz HEAD; \
+	   git archive --prefix=$(PACKAGE)-v$(VERSION)/ \
+	       -o $(abs_builddir)/$(PACKAGE)-v$(VERSION)-src.tar.gz HEAD; \
 	fi
 
 dist-hook: mtime-NEWS-to-git-HEAD
