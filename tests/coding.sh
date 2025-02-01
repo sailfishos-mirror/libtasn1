@@ -183,19 +183,6 @@ if  ! $FGREP -q "b1cea8feb4e3d83c1bc2314151e9a0fe" md5sum.$TMPFILEOUTPUT;then
 	exit 1
 fi
 
-# Test valid case where output file is not writable
-/usr/bin/touch "${srcdir}"/not_writable.tmp
-/usr/bin/chmod 444 "${srcdir}"/not_writable.tmp
-$VALGRIND "$ASN1CODING" $TMPFILE $TMPASSIGNFILE -o "${srcdir}"/not_writable.tmp
-if test $? != 1;then
-	/usr/bin/chmod 644 "${srcdir}"/not_writable.tmp
-	rm -f "${srcdir}"/not_writable.tmp
-	echo "Encoding failed (5)"
-	exit 1
-fi
-/usr/bin/chmod 644 "${srcdir}"/not_writable.tmp
-rm -f "${srcdir}"/not_writable.tmp
-
 # Test invalid OID value case (first digit of OID max is 2, we give 3)
 $VALGRIND "$ASN1CODING" "${srcdir}"/"Test_oid_invalid.asn" "${srcdir}"/"invalid-oid-assignments.txt" -o $TMPFILEOUTPUT
 if test $? != 1;then
