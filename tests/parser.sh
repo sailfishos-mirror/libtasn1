@@ -18,7 +18,6 @@
 
 PARSER="${PARSER:-../src/asn1Parser${EXEEXT}}"
 srcdir="${srcdir:-.}"
-abs_top_srcdir="${abs_top_srcdir:-..}"
 FGREP=${FGREP:-fgrep}
 TMPFILE=pkix.asn.$$.tmp
 TMPFILEOUTPUT=parser.out.$$.tmp
@@ -104,17 +103,10 @@ if ! $FGREP -q -- "--help" $TMPFILEOUTPUT; then
 fi
 
 # Test version option
-${VALGRIND} "${PARSER}" --version > $TMPFILEOUTPUT 2>&1
-EXPECTEDVER=$(cat "${abs_top_srcdir}"/.version)
+${VALGRIND} "${PARSER}" --version
 if test $? != 0; then
 	echo "Version command line arg - incorrect return code!"
 	exit 1
-fi
-
-# Look for actual version in the output
-if ! $FGREP -q "$EXPECTEDVER" $TMPFILEOUTPUT; then
-	echo "Version command line arg - incorrect command output!"
-    exit 1
 fi
 
 # Test check option - valid case

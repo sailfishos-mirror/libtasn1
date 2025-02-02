@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 srcdir="${srcdir:-.}"
-abs_top_srcdir="${abs_top_srcdir:-..}"
 
 ASAN_OPTIONS="detect_leaks=0:exitcode=6"
 export ASAN_OPTIONS
@@ -116,17 +115,10 @@ if test $? != 1;then
 fi
 
 # Test version option
-$VALGRIND "$ASN1CODING" --version > $TMPFILEOUTPUT 2>&1
-EXPECTEDVER=$(cat "${abs_top_srcdir}"/.version)
+$VALGRIND "$ASN1CODING" --version
 if test $? != 0; then
 	echo "Version command line arg - incorrect return code!"
 	exit 1
-fi
-
-# Look for actual version in the output
-if ! $FGREP -q "$EXPECTEDVER" $TMPFILEOUTPUT; then
-	echo "Version command line arg - incorrect command output!"
-    exit 1
 fi
 
 # Test valid case

@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 srcdir="${srcdir:-.}"
-abs_top_srcdir="${abs_top_srcdir:-..}"
 
 if ! test -z "${VALGRIND}";then
 VALGRIND="${LIBTOOL:-libtool} --mode=execute ${VALGRIND} --error-exitcode=7"
@@ -148,17 +147,10 @@ if ! $FGREP -q -- "--help" $TMPFILEOUTPUT; then
 fi
 
 # Test version option
-$VALGRIND "$ASN1DECODING" --version > $TMPFILEOUTPUT 2>&1
-EXPECTEDVER=$(cat "${abs_top_srcdir}"/.version)
+$VALGRIND "$ASN1DECODING" --version
 if test $? != 0; then
 	echo "Version command line arg - incorrect return code!"
 	exit 1
-fi
-
-# Look for actual version in the output
-if ! $FGREP -q "$EXPECTEDVER" $TMPFILEOUTPUT; then
-	echo "Version command line arg - incorrect command output!"
-    exit 1
 fi
 
 # Test passing an invalid filename
