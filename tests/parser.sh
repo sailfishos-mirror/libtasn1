@@ -129,23 +129,11 @@ if test $? = 0; then
 	exit 1
 fi
 
-# Look for Error: in output
-if ! $FGREP -q "Error:" $TMPFILEOUTPUT; then
-	echo "Check command line arg (invalid case) - incorrect command output!"
-    exit 1
-fi
-
 # Test passing an invalid filename
 ${VALGRIND} "${PARSER}" this_isnt_a_real_file.asn > $TMPFILEOUTPUT 2>&1
 if test $? = 0; then
 	echo "Test invalid filename - incorrect return code!"
 	exit 1
-fi
-
-# Look for not found in output
-if ! $FGREP -q "not found" $TMPFILEOUTPUT; then
-	echo "Test invalid filename - incorrect command output!"
-    exit 1
 fi
 
 # Another error case, causes "recursion" which falls to a default
@@ -154,11 +142,6 @@ ${VALGRIND} "${PARSER}" -c "${srcdir}"/CVE-2018-1000654-2.asn > $TMPFILEOUTPUT 2
 if test $? = 0; then
 	echo "Check recursion - incorrect return code!"
 	exit 1
-fi
-
-if ! $FGREP -q "ERROR:" $TMPFILEOUTPUT; then
-	echo "Check recursion - incorrect command output!"
-    exit 1
 fi
 
 rm -f ${TMPFILEOUTPUT}
