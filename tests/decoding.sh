@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 srcdir="${srcdir:-.}"
+top_srcdir="${top_srcdir:-../}"
 
 if ! test -z "${VALGRIND}";then
 VALGRIND="${LIBTOOL:-libtool} --mode=execute ${VALGRIND} --error-exitcode=7"
@@ -148,7 +149,7 @@ fi
 
 # Test version option
 $VALGRIND "$ASN1DECODING" --version > $TMPFILEOUTPUT 2>&1
-EXPECTEDVER=$(cat ../.version)
+EXPECTEDVER=$(cat "${top_srcdir}"/.version)
 if test $? != 0; then
 	echo "Version command line arg - incorrect return code!"
 	exit 1
