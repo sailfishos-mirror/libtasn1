@@ -110,7 +110,7 @@ if test $? != 0; then
 fi
 
 # Test check option - valid case
-${VALGRIND} "${PARSER}" -c Test_tree.asn > $TMPFILEOUTPUT 2>&1
+${VALGRIND} "${PARSER}" -c "${srcdir}"/Test_tree.asn > $TMPFILEOUTPUT 2>&1
 if test $? != 0; then
 	echo "Check command line arg (valid case) - incorrect return code!"
 	exit 1
@@ -123,7 +123,7 @@ if $FGREP -q "Error:" $TMPFILEOUTPUT; then
 fi
 
 # Test check option - invalid case
-${VALGRIND} "${PARSER}" -c Test_parser_ERROR.asn > $TMPFILEOUTPUT 2>&1
+${VALGRIND} "${PARSER}" -c "${srcdir}"/Test_parser_ERROR.asn > $TMPFILEOUTPUT 2>&1
 if test $? = 0; then
 	echo "Check command line arg (invalid case)- incorrect return code!"
 	exit 1
@@ -150,7 +150,7 @@ fi
 
 # Another error case, causes "recursion" which falls to a default
 # case in asn1Parser.c
-${VALGRIND} "${PARSER}" -c CVE-2018-1000654-2.asn > $TMPFILEOUTPUT 2>&1
+${VALGRIND} "${PARSER}" -c "${srcdir}"/CVE-2018-1000654-2.asn > $TMPFILEOUTPUT 2>&1
 if test $? = 0; then
 	echo "Check recursion - incorrect return code!"
 	exit 1
