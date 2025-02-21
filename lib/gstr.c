@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#include <int.h>
+#include "int.h"
 #include "gstr.h"
 
 /* These function are like strcat, strcpy. They only

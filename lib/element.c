@@ -27,9 +27,9 @@
 /*****************************************************/
 
 
-#include <int.h>
+#include "int.h"
 #include "parser_aux.h"
-#include <gstr.h>
+#include "gstr.h"
 #include "structure.h"
 #include "c-ctype.h"
 #include "element.h"

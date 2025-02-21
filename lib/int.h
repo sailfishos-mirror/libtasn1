@@ -37,12 +37,8 @@ struct asn1_node_array_st
   size_t size;
 };
 
-/* This structure is also in libtasn1.h, but then contains less
-   fields.  You cannot make any modifications to these first fields
-   without breaking ABI.  */
 struct asn1_node_st
 {
-  /* public fields: */
   char name[ASN1_MAX_NAME_SIZE + 1];	/* Node name */
   unsigned int name_hash;
   unsigned int type;		/* Node type */
@@ -51,7 +47,6 @@ struct asn1_node_st
   asn1_node down;		/* Pointer to the son node */
   asn1_node right;		/* Pointer to the brother node */
   asn1_node left;		/* Pointer to the next list element */
-  /* private fields: */
   unsigned char small_value[ASN1_SMALL_VALUE_SIZE];	/* For small values */
   asn1_node parent;		/* Pointer to the parent node */
   struct asn1_node_array_st numbered_children;	/* Array of unnamed child nodes for caching */

@@ -27,10 +27,10 @@
 /*****************************************************/
 
 
-#include <int.h>
-#include <structure.h>
+#include "int.h"
+#include "structure.h"
 #include "parser_aux.h"
-#include <gstr.h>
+#include "gstr.h"
 #include "c-ctype.h"
 #include "element.h"
 #include <limits.h>

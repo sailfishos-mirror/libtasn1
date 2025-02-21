@@ -28,9 +28,9 @@
 /*   ASN.1 syntax                                    */
 /*****************************************************/
 
-#include <int.h>
-#include <parser_aux.h>
-#include <structure.h>
+#include "int.h"
+#include "parser_aux.h"
+#include "structure.h"
 #include <libtasn1.h>
 #include "c-ctype.h"
 

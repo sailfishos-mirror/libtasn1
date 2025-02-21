@@ -25,13 +25,13 @@
 /* Description: Functions to manage DER decoding     */
 /*****************************************************/
 
-#include <int.h>
-#include <parser_aux.h>
-#include <gstr.h>
-#include <structure.h>
-#include <element.h>
+#include "int.h"
+#include "parser_aux.h"
+#include "gstr.h"
+#include "structure.h"
+#include "element.h"
 #include <limits.h>
-#include <intprops.h>
+#include "intprops.h"
 #include "c-ctype.h"
 
 #ifdef DEBUG

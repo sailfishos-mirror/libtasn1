@@ -20,10 +20,8 @@
 
 #include <config.h>
 
-#include <int.h>
-#ifdef STDC_HEADERS
-# include <stdarg.h>
-#endif
+#include "int.h"
+#include <stdarg.h>
 
 #define LIBTASN1_ERROR_ENTRY(name) { #name, name }
 
