@@ -20,15 +20,12 @@
 #
 # This file is part of libtasn1.
 
-include $(top_srcdir)/aminclude_static.am
-
-AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS) $(CODE_COVERAGE_CFLAGS)
+AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/lib/includes -I$(top_srcdir)/lib/includes -I$(srcdir) \
- -I$(top_builddir)/lib/gl -I$(top_srcdir)/lib/gl -DSRCDIR=\"$(abs_srcdir)\" \
- $(CODE_COVERAGE_CPPFLAGS)
+ -I$(top_builddir)/lib/gl -I$(top_srcdir)/lib/gl -DSRCDIR=\"$(abs_srcdir)\"
 AM_LDFLAGS = -no-install
 
-LDADD = ../lib/gl/libgnu.la ../lib/libtasn1.la $(FUZZ_LIBS) $(CODE_COVERAGE_LIBS)
+LDADD = ../lib/gl/libgnu.la ../lib/libtasn1.la $(FUZZ_LIBS)
 
 FUZZERS = \
  libtasn1_array2tree_fuzzer$(EXEEXT) \
@@ -72,11 +69,6 @@ dist-hook:
 	find $(srcdir) -name '*.dict' -exec cp -v '{}' $(distdir) ';'
 #	find $(srcdir) -name '*.in' -exec cp -vr '{}' $(distdir) ';'
 	find $(srcdir) -name '*.repro' -exec cp -vr '{}' $(distdir) ';'
-
-clean-local: code-coverage-clean
-	rm -rf *.gc?? *.log lcov
-
-distclean-local: code-coverage-dist-clean
 
 oss-fuzz:
 	if test "$$OUT" != ""; then \

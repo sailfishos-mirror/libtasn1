@@ -37,8 +37,6 @@ endif
 
 SUBDIRS += fuzz tests
 
-include $(top_srcdir)/aminclude_static.am
-
 ABIDW_COMMON = --no-show-locs --no-corpus-path
 ABIGNORE_FILE = "$(top_srcdir)/devel/libtasn1.abignore"
 LIBGNUTLS_ABI_LAST_FILE = "$(top_srcdir)/devel/libtasn1-latest-$$(uname -m).abi"
@@ -86,12 +84,6 @@ abi-check: lib/libtasn1.la
 	@echo "********************"
 
 files-update: abi-dump-latest
-
-local-code-coverage-output: code-coverage-capture
-	cat "GNU Libtasn1-$(VERSION)-coverage/index.html"|grep headerCovTableEntry|grep '%'|head -1|sed 's/^.*>\([0-9]\+\.[0-9]\+\s*%\)<.*$$/ coverage lines: \1/' || true
-
-clean-local: code-coverage-clean
-distclean-local: code-coverage-dist-clean
 
 # git-version-gen
 EXTRA_DIST += $(top_srcdir)/.version
