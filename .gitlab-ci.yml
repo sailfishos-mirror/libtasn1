@@ -291,7 +291,7 @@ B-Guix:
   - time make V=1 dist
   - !reference [.save-artifacts, script]
 
-# https://docs.gitlab.com/ee/ci/runners/hosted_runners/macos.html
+# https://docs.gitlab.com/ci/runners/hosted_runners/macos/
 B-macOS14Xcode15:
   rules:
   - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -339,6 +339,23 @@ B-macOS15Xcode16:
   - time make -j$(nproc) check -k V=1 VERBOSE=t
   - time make dist
   - !reference [.save-artifacts, script]
+
+macOS15Xcode16:
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  image: macos-15-xcode-16
+  tags: [ saas-macos-medium-m1 ]
+  stage: test
+  needs: [B-Trisquel11]
+  script:
+  - gzip -cd out/b-trisquel11/*-*.tar.gz | tar xf -
+  - cd $(gzip -cd out/b-trisquel11/*-*.tar.gz | tar tf - | head -n1)
+  - mkdir b
+  - cd b
+  - time ../configure --enable-gcc-warnings
+  - time make -j$(nproc) syntax-check
+  - time make -j$(nproc) V=1 check -k VERBOSE=t
 
 0-compare:
   image: alpine:latest
@@ -906,23 +923,6 @@ Fedora39-arm64:
   - cd $(tar tfz out/b-trisquel11/*-*.tar.gz | head -n1)
   - time ./configure --enable-gcc-warnings --disable-doc
   - time make -j$(nproc) check V=1 VERBOSE=t
-
-macOS13Xcode14:
-  rules:
-  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  image: macos-13-xcode-14
-  tags: [ saas-macos-medium-m1 ]
-  stage: test
-  needs: [B-Trisquel11]
-  script:
-  - gzip -cd out/b-trisquel11/*-*.tar.gz | tar xf -
-  - cd $(gzip -cd out/b-trisquel11/*-*.tar.gz | tar tf - | head -n1)
-  - mkdir b
-  - cd b
-  - time ../configure --enable-gcc-warnings
-  - time make -j$(nproc) syntax-check
-  - time make -j$(nproc) V=1 check -k VERBOSE=t
 
 OpenBSD:
   rules:
