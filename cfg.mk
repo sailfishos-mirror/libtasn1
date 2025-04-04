@@ -70,11 +70,6 @@ sc_codespell:
 sc_libtool_version_bump:
 	@git diff v$(PREV_VERSION).. | grep '^+AC_SUBST(LT' > /dev/null
 
-aximport:
-	for f in m4/ax_*.m4; do \
-		wget -O $$f "https://git.savannah.gnu.org/gitweb/?p=autoconf-archive.git;a=blob_plain;f=$$f"; \
-	done
-
 review-tag ?= $(shell git describe --abbrev=0)
 review-diff:
 	git diff $(review-tag).. \

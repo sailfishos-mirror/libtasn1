@@ -1056,19 +1056,43 @@ Windows-MSYS:
     make -j$(nproc) V=1 -k check VERBOSE=t'
   - C:\msys64\usr\bin\bash -lc 'grep ^PASS *-*/tests/version.log'
 
+Coverage:
+  image: debian:trixie-slim
+  stage: build
+  before_script:
+  - cat /etc/os-release
+  - time apt-get update -q
+  - time apt-get install -y -q eatmydata
+  - time eatmydata apt-get install -y -q --no-install-recommends wget ca-certificates make gcc git patch autoconf automake libtool bison
+  - time eatmydata apt-get install -y -q lcov
+  script:
+  - !reference [.gnulib-fetch, script]
+  - time ./bootstrap --no-git
+  - ./configure --disable-gcc-warnings --disable-doc
+  - make init-coverage
+  - make build-coverage VERBOSE=t
+  - lcov --remove doc/coverage/libtasn1.info '/usr/include/*' -o doc/coverage/libtasn1-filtered.info
+  - genhtml --output-directory doc/coverage doc/coverage/libtasn1-filtered.info --frames --legend --title "GNU Libtasn1"
+  - git diff --exit-code # nothing should change version controlled files
+  artifacts:
+    when: on_success
+    paths:
+      - doc/coverage
+
 .pages:
   image: $CI_REGISTRY/$BUILD_IMAGES_PROJECT:$FEDORA_BUILD
+  needs: ["Coverage"]
   script:
-  - dnf install -y dblatex
-  - time ./bootstrap
-  - CFLAGS="-g -Og" dash ./configure --enable-code-coverage --enable-gtk-doc --enable-gtk-doc-pdf --disable-gcc-warnings
   - mkdir -p public
+  - mv doc/coverage/ public/
+  - dnf install -y dblatex
+  - !reference [.gnulib-fetch, script]
+  - time ./bootstrap --no-git
+  - ./configure --enable-gtk-doc --enable-gtk-doc-pdf --disable-gcc-warnings
   - time make -j$(nproc)
   - time make -j$(nproc) check
-  - time make local-code-coverage-output || true
   - time make -C doc libtasn1.html libtasn1.pdf
   - mv doc/libtasn1.pdf doc/libtasn1.html public/
-  - cp -ar GNU*-coverage/ public/coverage
   - cp public/libtasn1.html public/index.html
   - rm -rf public/reference
   - mv doc/reference/html public/reference

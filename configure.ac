@@ -64,8 +64,6 @@ AC_CHECK_SIZEOF(unsigned int, 4)
 gl_INIT
 sgl_INIT
 
-AX_CODE_COVERAGE
-
 AC_ARG_ENABLE([gcc-warnings],
   [AS_HELP_STRING([--disable-gcc-warnings],
     [disable GCC warnings (for developers)])],
