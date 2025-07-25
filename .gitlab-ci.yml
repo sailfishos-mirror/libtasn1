@@ -95,7 +95,7 @@ B-clang:
   - !reference [.save-artifacts, script]
 
 B-Debian10:
-  image: debian:10-slim
+  image: debian/eol:buster-slim
   stage: build
   before_script:
   - apt-get update -qq | tail
