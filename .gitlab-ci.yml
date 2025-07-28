@@ -857,19 +857,6 @@ AlmaLinux8-c89:
   - time ./configure --enable-gcc-warnings ac_cv_prog_cc_c11=-std=c89
   - time make check V=1 VERBOSE=t WERROR_CFLAGS='-Dinline= -Werror -Wno-error=unused-function -Wno-error=nested-externs -Wno-error=implicit-function-declaration'
 
-Debian3:
-  image: debian/eol:woody
-  stage: test
-  needs: [B-Trisquel11]
-  before_script:
-  - apt-get update
-  - apt-get install -y -qq make gcc libc-dev
-  script:
-  - tar xfz out/b-trisquel11/*-*.tar.gz
-  - cd $(tar tfz out/b-trisquel11/*-*.tar.gz | head -n1)
-  - time ./configure --enable-gcc-warnings
-  - time make check V=1 VERBOSE=t
-
 Debian3.1:
   image: debian/eol:sarge
   stage: test
