@@ -77,7 +77,6 @@ main (int argc, char *argv[])
     {"help", no_argument, 0, 'h'},
     {"strict", no_argument, 0, 's'},
     {"no-time-strict", no_argument, 0, 't'},
-    {"debug", no_argument, 0, 'd'},
     {"benchmark", no_argument, 0, 'b'},
     {"version", no_argument, 0, 'v'},
     {0, 0, 0, 0}
@@ -92,7 +91,7 @@ main (int argc, char *argv[])
   int asn1_result = ASN1_SUCCESS;
   unsigned char *der;
   int der_len = 0, benchmark = 0;
-  int flags = 0, debug = 0;
+  int flags = 0;
   /* FILE *outputFile; */
 
   set_program_name (argv[0]);
@@ -103,7 +102,7 @@ main (int argc, char *argv[])
     {
 
       option_result =
-	getopt_long (argc, argv, "hbdsvtc", long_options, &option_index);
+	getopt_long (argc, argv, "hbsvt", long_options, &option_index);
 
       if (option_result == -1)
 	break;
@@ -115,9 +114,6 @@ main (int argc, char *argv[])
 	  break;
 	case 'b':
 	  benchmark = 1;
-	  break;
-	case 'd':
-	  debug = 1;
 	  break;
 	case 's':
 	case 't':
@@ -193,7 +189,7 @@ main (int argc, char *argv[])
 
 
   {
-    size_t tmplen;
+    size_t tmplen = 0;
     der = (unsigned char *) read_file (inputFileDerName, RF_BINARY, &tmplen);
     der_len = tmplen;
   }
@@ -201,10 +197,11 @@ main (int argc, char *argv[])
   /* read_binary_file() returns a buffer with more data than required,
    * with this reallocation we ensure that memory accesses outside the
    * boundaries are detected */
-  if (der != NULL && debug != 0)
-    der = realloc (der, der_len);
-
-  if (der == NULL)
+  if (der != NULL)
+    {
+      der = realloc (der, der_len);
+    }
+  else
     {
       fprintf (stderr, "asn1Decoding: could not read '%s'\n",
 	       inputFileDerName);
