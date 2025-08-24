@@ -1,7 +1,9 @@
 GNU Libtasn1 NEWS                                     -*- outline -*-
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
-- Support for the undocumented "--debug" flag for asn1Decoding has been removed.
+- Undocumented asn1Decoding --debug flag removed, thanks to Andrew Hamilton.
+- Code coverage for src/ went from 35% to 82%, thanks to Andrew Hamilton.
+- Fix of ASN.1 typo in manual, thanks to Masatake YAMATO.
 
 * Noteworthy changes in release 4.20.0 (2025-02-01) [stable]
 - The release tarball is now reproducible.
