@@ -48,7 +48,8 @@ EXTRA_DIST = Test_parser.asn Test_tree.asn Test_tree_asn1_tab.c	mscat.asn \
 	invalid-x509/id-000034.der invalid-x509/id-000035.der \
 	invalid-pkcs7/id-000001.der invalid-pkcs7/id-000002.der \
 	invalid-pkcs7/id-000003.der invalid-assignments1.txt \
-	invalid-assignments2.txt pkix.asn.out
+	invalid-assignments2.txt pkix.asn.out invalid-oid-assignments.txt \
+	Test_oid_invalid.asn assignments.asn.out
 
 # For crlf.
 EXTRA_DIST += crlf.cer crl.der ocsp.der

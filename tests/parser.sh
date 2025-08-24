@@ -18,7 +18,9 @@
 
 PARSER="${PARSER:-../src/asn1Parser${EXEEXT}}"
 srcdir="${srcdir:-.}"
+FGREP=${FGREP:-fgrep}
 TMPFILE=pkix.asn.$$.tmp
+TMPFILEOUTPUT=parser.out.$$.tmp
 
 if ! test -z "${VALGRIND}"; then
 	VALGRIND="${LIBTOOL:-libtool} --mode=execute valgrind --leak-check=full"
@@ -26,7 +28,7 @@ fi
 
 echo "Test: PKIX file generation"
 
-${VALGRIND} ${PARSER} ${srcdir}/pkix.asn -o ${TMPFILE}
+${VALGRIND} "${PARSER}" "${srcdir}"/pkix.asn -o ${TMPFILE}
 
 if test $? != 0;then
 	echo "Cannot generate C file!"
@@ -54,5 +56,94 @@ if test $? != 0;then
 fi
 
 rm -f ${TMPFILE}
+
+# Test invalid command line option
+${VALGRIND} "${PARSER}" --asdf > $TMPFILEOUTPUT 2>&1
+
+if test $? != 1; then
+	echo "Invalid command line arg - incorrect return code!"
+	exit 1
+fi
+
+# Look for "--help" in the output, make grep quiet.
+# "--" to avoid grep trying to interpret "--help" as an option.
+if ! $FGREP -q -- "--help" $TMPFILEOUTPUT; then
+	echo "Invalid command line arg - incorrect command output!"
+    exit 1
+fi
+
+# Test help command line option
+${VALGRIND} "${PARSER}" --help > $TMPFILEOUTPUT 2>&1
+
+if test $? != 0; then
+	echo "Help command line arg - incorrect return code!"
+	exit 1
+fi
+
+# Look for "--help" in the output, make grep quiet.
+# "--" to avoid grep trying to interpret "--help" as an option.
+if ! $FGREP -q -- "--help" $TMPFILEOUTPUT; then
+	echo "Help command line arg - incorrect command output!"
+    exit 1
+fi
+
+# Test no options
+${VALGRIND} "${PARSER}" > $TMPFILEOUTPUT 2>&1
+
+if test $? != 0; then
+	echo "No command line arg - incorrect return code!"
+	exit 1
+fi
+
+# Look for "--help" in the output, make grep quiet.
+# "--" to avoid grep trying to interpret "--help" as an option.
+if ! $FGREP -q -- "--help" $TMPFILEOUTPUT; then
+	echo "No command line arg - incorrect command output!"
+    exit 1
+fi
+
+# Test version option
+${VALGRIND} "${PARSER}" --version
+if test $? != 0; then
+	echo "Version command line arg - incorrect return code!"
+	exit 1
+fi
+
+# Test check option - valid case
+${VALGRIND} "${PARSER}" -c "${srcdir}"/Test_tree.asn > $TMPFILEOUTPUT 2>&1
+if test $? != 0; then
+	echo "Check command line arg (valid case) - incorrect return code!"
+	exit 1
+fi
+
+# Look for actual version in the output
+if $FGREP -q "Error:" $TMPFILEOUTPUT; then
+	echo "Check command line arg (valid case) - incorrect command output!"
+    exit 1
+fi
+
+# Test check option - invalid case
+${VALGRIND} "${PARSER}" -c "${srcdir}"/Test_parser_ERROR.asn > $TMPFILEOUTPUT 2>&1
+if test $? = 0; then
+	echo "Check command line arg (invalid case)- incorrect return code!"
+	exit 1
+fi
+
+# Test passing an invalid filename
+${VALGRIND} "${PARSER}" this_isnt_a_real_file.asn > $TMPFILEOUTPUT 2>&1
+if test $? = 0; then
+	echo "Test invalid filename - incorrect return code!"
+	exit 1
+fi
+
+# Another error case, causes "recursion" which falls to a default
+# case in asn1Parser.c
+${VALGRIND} "${PARSER}" -c "${srcdir}"/CVE-2018-1000654-2.asn > $TMPFILEOUTPUT 2>&1
+if test $? = 0; then
+	echo "Check recursion - incorrect return code!"
+	exit 1
+fi
+
+rm -f ${TMPFILEOUTPUT}
 
 exit 0

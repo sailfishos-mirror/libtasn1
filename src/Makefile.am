@@ -20,7 +20,6 @@ SUBDIRS = gl
 
 AM_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/lib/includes -I$(top_srcdir)/lib/includes
-AM_CPPFLAGS += -I$(top_builddir)/lib/gl -I$(top_srcdir)/lib/gl
 AM_CPPFLAGS += -I$(builddir)/gl -I$(srcdir)/gl
 
 LDADD = ../lib/libtasn1.la ../lib/gl/libgnu.la gl/libsgl.la
