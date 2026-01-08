@@ -18,7 +18,7 @@
 
 manual_title = Library for Abstract Syntax Notation One (ASN.1)
 
-old_NEWS_hash = e8f566c8fc87cf22b159bba1d509b04d
+old_NEWS_hash = f2a64ef0e95190b5923180434218bde2
 
 guix = $(shell command -v guix > /dev/null && echo ,guix)
 bootstrap-tools = gnulib,autoconf,automake,libtoolize,make,makeinfo,bison,help2man,gtkdocize,tar,gzip$(guix)
