@@ -6,7 +6,7 @@ GNU Libtasn1 NEWS                                     -*- outline -*-
 - Fix of ASN.1 typo in manual, thanks to Masatake YAMATO.
 - NEWS renamed to NEWS.md and uses markdown syntax.
 - Update gnulib files and various build/maintenance fixes.
-- Fix for vulnerbaility CVE-2025-13151 Stack-based buffer overflow
+- Fix for vulnerability CVE-2025-13151 Stack-based buffer overflow
 
 # Noteworthy changes in release 4.20.0 (2025-02-01) [stable]
 - The release tarball is now reproducible.
