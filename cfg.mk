@@ -18,7 +18,7 @@
 
 manual_title = Library for Abstract Syntax Notation One (ASN.1)
 
-old_NEWS_hash = 68919c99ea7b69fa48c9455048a63252
+old_NEWS_hash = e8f566c8fc87cf22b159bba1d509b04d
 
 guix = $(shell command -v guix > /dev/null && echo ,guix)
 bootstrap-tools = gnulib,autoconf,automake,libtoolize,make,makeinfo,bison,help2man,gtkdocize,tar,gzip$(guix)
@@ -49,7 +49,7 @@ exclude_file_name_regexp--sc_require_config_h = ^examples/CertificateExample.c|e
 exclude_file_name_regexp--sc_require_config_h_first = $(exclude_file_name_regexp--sc_require_config_h)
 exclude_file_name_regexp--sc_prohibit_magic_number_exit = ^tests/.*$$
 
-TAR_OPTIONS += --mode=go+u,go-w --mtime=$(abs_top_srcdir)/NEWS
+TAR_OPTIONS += --mode=go+u,go-w --mtime=$(abs_top_srcdir)/NEWS.md
 
 announce_gen_args = --cksum-checksums
 DIST_ARCHIVES += $(shell \

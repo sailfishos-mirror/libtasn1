@@ -112,6 +112,18 @@ FUZZ_LIBS=$LIBS
 LIBS=$OLD_LIBS
 AC_SUBST([FUZZ_LIBS])
 
+st_touch=197001010000.00
+AC_MSG_CHECKING([for timestamps of last git commit])
+if test -e "$srcdir"/.git && command -v git > /dev/null; then
+   if tmp=$(env TZ=UTC0 git log -1 --format=%cd --date=format-local:%Y%m%d%H%M.%S); then
+      st_touch="$tmp"
+   fi
+fi
+AC_MSG_RESULT(touch $st_touch)
+env TZ=UTC0 \
+    touch -m -t "$st_touch" \
+          "$srcdir"/NEWS.md "$srcdir"/doc/$PACKAGE.texi
+
 AC_CONFIG_FILES([
   Makefile
   doc/Makefile
