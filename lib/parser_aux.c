@@ -741,7 +741,7 @@ int
 _asn1_expand_object_id (list_type **list, asn1_node node)
 {
   asn1_node p, p2, p3, p4, p5;
-  char name_root[ASN1_MAX_NAME_SIZE], name2[2 * ASN1_MAX_NAME_SIZE + 1];
+  char name_root[ASN1_MAX_NAME_SIZE], name2[2 * ASN1_MAX_NAME_SIZE + 2];
   int move, tlen, tries;
   unsigned max_constants;
 
