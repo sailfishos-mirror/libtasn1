@@ -291,6 +291,10 @@ B-Trisquel12:
   image: kpengboy/trisquel:12.0
   extends: .trisquelubuntu
 
+B-Ubuntu2604:
+  image: ubuntu:26.04
+  extends: .trisquelubuntu
+
 B-Guix:
   image: registry.gitlab.com/debdistutils/guix/container:latest
   stage: build
@@ -385,7 +389,7 @@ macOS26Xcode26:
 0-compare:
   image: alpine:latest
   stage: repro
-  needs: [ B-AlmaLinux8, B-AlmaLinux9, B-AlmaLinux10, B-RockyLinux8, B-RockyLinux9, B-RockyLinux10, B-Trisquel11, B-Trisquel12, B-Guix, B-Ubuntu2204, B-Ubuntu2404, B-PureOS10, B-Debian11, B-Devuan5, B-Debian12, B-Devuan6, B-Debian13, B-gcc, B-clang, B-Debian10, R-Guix, R-Debian12, R-Ubuntu2404, S-Trisquel10, S-Ubuntu2004 ]
+  needs: [ B-AlmaLinux8, B-AlmaLinux9, B-AlmaLinux10, B-RockyLinux8, B-RockyLinux9, B-RockyLinux10, B-Trisquel11, B-Trisquel12, B-Guix, B-Ubuntu2204, B-Ubuntu2404, B-PureOS10, B-Debian11, B-Devuan5, B-Debian12, B-Devuan6, B-Debian13, B-gcc, B-clang, B-Debian10, R-Guix, R-Debian12, R-Ubuntu2404, S-Trisquel10, S-Ubuntu2004, B-Ubuntu2604 ]
   script:
   - cd out
   - sha256sum */*.tar.* */*/*.tar.* | sort | grep    -- -src.tar.
@@ -404,6 +408,7 @@ macOS26Xcode26:
   - cmp b-almalinux8/src/*.tar.gz b-rockylinux9/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz b-trisquel12/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz b-ubuntu2404/src/*.tar.gz
+  - cmp b-almalinux8/src/*.tar.gz b-ubuntu2604/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz r-guix/src/*.tar.gz
   - cmp b-almalinux8/src/*.tar.gz r-ubuntu2404/src/*v4*.tar.gz
 # Confirm modern git-archive tarball reproducibility - with libz-ng
