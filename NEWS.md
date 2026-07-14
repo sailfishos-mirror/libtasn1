@@ -1,7 +1,7 @@
 GNU Libtasn1 NEWS                                     -*- outline -*-
 
 # Noteworthy changes in release ?.? (????-??-??) [?]
-
+- Update gnulib files and various build/maintenance fixes.
 
 # Noteworthy changes in release 4.21.0 (2026-01-08) [stable]
 - Undocumented asn1Decoding --debug flag removed, thanks to Andrew Hamilton.
