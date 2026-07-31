@@ -1004,7 +1004,7 @@ Ubuntu-latest-distcheck:
   needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
-  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc gtk-doc-tools texinfo
+  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc libc-dev gtk-doc-tools texinfo
   script:
   - tar xfz out/b-trisquel11/*-*.tar.gz
   - cd $(tar tfz out/b-trisquel11/*-*.tar.gz | head -n1)
@@ -1018,7 +1018,7 @@ Ubuntu-rolling-distcheck:
   needs: [B-Trisquel11]
   before_script:
   - apt-get update -qq
-  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc gtk-doc-tools texinfo
+  - env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq make gcc libc-dev gtk-doc-tools texinfo
   script:
   - tar xfz out/b-trisquel11/*-*.tar.gz
   - cd $(tar tfz out/b-trisquel11/*-*.tar.gz | head -n1)
